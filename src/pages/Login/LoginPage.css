@@ -1,0 +1,216 @@
+.login-page-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    box-sizing: border-box;
+    padding-top: 120px;
+}
+
+.login-left {
+    flex: 1;
+    display: flex;
+    width: 300px;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-img {
+    width: 300px;
+    height: auto;
+}
+
+.login-right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-box {
+    background-color: #F8F8F8;
+    padding: 30px 40px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 600px;
+    height: 75vh;
+    text-align: center;
+}
+
+
+/* 로고 부분 */
+.login-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.login-logo img {
+    width: 36px;
+    height: 36px;
+    margin-right: 12px;
+}
+
+.login-logo h1 {
+    display: flex;
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: left;
+    line-height: 1.4;
+    color: #48A988;
+}
+
+/* 로그인 텍스트 */
+.login-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #48A988;
+    margin-bottom: 40px;
+}
+
+/* 입력 그룹 */
+.input-group {
+    margin-bottom: 36px;
+    position: relative;
+}
+
+.login-input {
+    width: 100%;
+    border: none;
+    padding: 14px 8px;
+    font-size: 18px;
+    outline: none;
+    background-color: transparent;
+}
+
+.underline {
+    height: 2px;
+    background-color: #ccc;
+    transition: background-color 0.3s;
+}
+
+.underline.active {
+    background-color: #48A988;
+    height: 2px;
+}
+
+/* 로그인 버튼 */
+.login-button {
+    background-color: #61DCB2;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    padding: 14px 0;
+    font-size: 23px;
+    width: 100%;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #48A988;
+}
+
+@media screen and (max-width: 480px) {
+
+    .login-img,
+    .login-left {
+        display: none;
+    }
+
+    .login-page-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 50px;
+    }
+
+    .login-right {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: start;
+    }
+
+    .login-box {
+        background-color: #f9f9f9;
+        padding: 50px 40px;
+        padding-bottom: 0;
+        border-radius: 20px;
+        width: 80%;
+        max-width: 450px;
+        max-height: 500px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .login-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 35px;
+    }
+
+    .login-logo img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .login-logo h1 {
+        margin: 0;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 1.4;
+        color: #48A988;
+    }
+
+    .login-title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #48A988;
+        margin-bottom: 40px;
+    }
+
+    /* 입력 그룹 */
+    .input-group {
+        margin-bottom: 36px;
+        position: relative;
+    }
+
+    .login-input {
+        width: 100%;
+        border: none;
+        border-bottom: 2px solid #ccc;
+        padding: 14px 8px;
+        font-size: 16px;
+        outline: none;
+        background-color: transparent;
+    }
+
+    .underline {
+        height: 1px;
+        transition: background-color 0.3s;
+    }
+
+    .underline.active {}
+
+    /* 로그인 버튼 */
+    .login-button {
+        background-color: #90D9B3;
+        border: none;
+        border-radius: 12px;
+        color: white;
+        padding: 14px 0;
+        font-size: 18px;
+        width: 100%;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .login-button:hover {
+        background-color: #48A988;
+    }
+}

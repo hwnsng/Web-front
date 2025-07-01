@@ -1,0 +1,262 @@
+body {
+  margin: 0;
+}
+
+.page {
+  width: 100vw;
+  height: 100vh;
+  padding-top: 60px;
+  position: relative;
+}
+
+.wrap {
+  display: flex;
+  border-radius: 40px;
+  padding-top: 40px;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  justify-content: center;
+  position: relative;
+}
+
+.match-container {
+  width: 682px;
+  height: 572px;
+}
+
+.top-box {
+  width: 337px;
+  max-height: 149px;
+  margin: 0 auto;
+}
+
+.title-box {
+  display: flex;
+  width: 100%;
+  height: 29px;
+  justify-content: center;
+  align-items: center;
+  font-size: 26 px;
+  font-weight: bold;
+  color: #878787;
+}
+
+.class-title-box {
+  display: flex;
+  width: 100%;
+  font-size: 56px;
+  font-weight: bold;
+  align-items: center;
+  justify-content: space-between;
+
+  span {
+    color: #878787;
+    font-size: 32px;
+  }
+}
+
+.bottom-container {
+  display: flex;
+  width: 100%;
+  height: 389px;
+  margin-top: 32px;
+  background-color: #F8F8F8;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.bottom-box {
+  width: 488px;
+  height: 309px;
+}
+
+.class-sub-box {
+  display: flex;
+  width: 304px;
+  height: 48px;
+  margin: 0 auto;
+  font-size: 40px;
+  font-weight: bold;
+  align-items: center;
+  justify-content: space-between;
+
+  span {
+    color: #C1C1C1;
+    font-size: 36px;
+  }
+}
+
+.recent-box {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: #2E2E2E;
+  margin-top: 26px;
+}
+
+.recent-result-box {
+  display: flex;
+  width: auto;
+  gap: 6px;
+  justify-content: center;
+  height: 29px;
+}
+
+.recent-result-box span {
+  display: flex;
+  width: 29px;
+  height: 29px;
+  border-radius: 5px;
+  border: 2px solid #FF5A5A;
+  font-size: 15px;
+  color: #FF7534;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+
+.recent-result-box span.active {
+  color: #3182F6;
+  border: 2px solid #3182F6;
+}
+
+.rank-box {
+  display: flex;
+  min-width: 240px;
+  height: 24px;
+  margin-top: 35px;
+  justify-content: center;
+}
+
+.today-match-info-box {
+  display: flex;
+  min-width: 250px;
+  height: 24px;
+  margin-top: 22px;
+  justify-content: center;
+}
+
+.rank-info-box,
+.today-info-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  font-size: 20px;
+  color: #8D8E8D;
+}
+
+.rank-info-box span.number,
+.today-info-box span.number {
+  display: inline-block;
+  width: 50px;
+  text-align: center;
+  font-weight: bold;
+  color: #FF7534;
+}
+
+.today-info-box span.number {
+  color: #2E2E2E;
+}
+
+.rank-info-box span.label,
+.today-info-box span.label {
+  margin: 0 40px;
+  font-weight: normal;
+  color: #8D8E8D;
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 768px) {
+  .page {
+    padding: 0;
+    padding-top: 150px;
+  }
+
+  .wrap {
+    flex-direction: column;
+    margin: 0 24px;
+    min-height: 910px;
+    width: 100%;
+    padding: 15px;
+    border-radius: 20px;
+    margin-bottom: 150px;
+    align-items: center;
+  }
+
+  .match-container {
+    height: 393px;
+    width: 343px;
+    margin-bottom: 24px;
+  }
+
+  .class-title-box {
+    font-size: 36px;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .class-title-box span {
+    font-size: 24px !important;
+  }
+
+  .class-sub-box {
+    font-size: 28px;
+    width: 242px;
+    margin-top: 25px;
+  }
+
+  .class-sub-box span {
+    font-size: 20px !important;
+  }
+
+  .top-box {
+    width: 337px;
+    max-height: 149px;
+    margin: 0 auto;
+  }
+
+  .bottom-container {
+    display: flex;
+    width: 343px;
+    height: 253px;
+    margin-top: 32px;
+    background-color: #F8F8F8;
+    border-radius: 10px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .bottom-box {
+    width: 360px;
+    height: 287px;
+  }
+
+  .recent-box {
+    width: 246px;
+    font-size: 15px;
+  }
+
+  .recent-result-box {
+    width: 75px;
+
+    span {
+      width: 23px;
+      height: 23px;
+      font-size: 12px;
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .today-match-info-box:last-of-type {
+    display: none;
+  }
+}

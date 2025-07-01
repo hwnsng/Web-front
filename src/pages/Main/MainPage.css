@@ -1,0 +1,141 @@
+/* MainPage.css */
+
+.main-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.main-content {
+  display: flex;
+  width: 100vw;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.text-section {
+  flex: 1;
+  padding: 0 64px;
+}
+
+.subtitle {
+  font-size: 25px;
+  color: #000000;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+.main-title {
+  font-size: 60px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.highlight {
+  color: #48A988;
+}
+
+.button-group {
+  margin-top: 34px;
+}
+
+.main-button {
+  padding: 10px 20px;
+  width: 220px;
+  border: 2px solid #48A988;
+  color: #48A988;
+  background-color: transparent;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.main-button:hover {
+  background-color: #48A988;
+  color: white;
+}
+
+.image-section {
+  padding-right: 200px;
+}
+
+.image-section img {
+  width: 227px;
+  height: 376px;
+}
+
+.image-mobile {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .main-container {
+    margin-top: 0px;
+    padding: 0px 10px;
+  }
+
+  .main-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .text-section {
+    width: 100%;
+    margin-top: 0px;
+    padding: 0px 10px;
+  }
+
+  .subtitle {
+    font-size: 20px;
+    margin-bottom: 5px;
+  }
+
+  .main-title {
+    font-size: 27px;
+    line-height: 1.2;
+    margin-bottom: 40px;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 100px;
+    padding: 0 0px;
+  }
+
+  .main-button {
+    max-width: 180px;
+    height: 48px;
+    font-size: 14px;
+    padding: 0;
+    border-radius: 15px;
+    text-align: center;
+    margin: 0;
+  }
+
+  .main-button:hover {
+    background-color: #48A988;
+    color: white;
+  }
+
+  .image-mobile {
+    display: block;
+    margin-top: 70px;
+    margin-bottom: 140px;
+  }
+
+  .image-mobile img {
+    width: 163px;
+    height: 270px;
+    margin-left: 20px;
+  }
+
+  .image-section {
+    display: none;
+  }
+}
