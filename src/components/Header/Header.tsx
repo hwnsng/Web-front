@@ -25,9 +25,9 @@ export default function Header() {
         <div className="nav-item">
           <Link to="/rankPage" className={location.pathname === "/rankPage" ? "active" : ""}>순위</Link>
         </div>
-        <div className="nav-item">
+        {/* <div className="nav-item">
           {<Link to="/loginPage" className={location.pathname === "/loginPage" ? "active" : ""}>로그인</Link>}
-        </div>
+        </div> */}
       </div>
     </div>
   );
