@@ -10,7 +10,6 @@ type MatchSchedule = {
 type WeeklyMatches = Record<Weekday, MatchSchedule>;
 
 export default function WeekMatchPage() {
-
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
@@ -46,29 +45,9 @@ export default function WeekMatchPage() {
         const [teamA, teamB] = match.split(' vs ');
         return (
             <>
-                {teamA} <span style={{ padding: '0px 5px', color: '#48A988', fontSize: '20px' }}>vs</span> {teamB}
+                {teamA} <span style={{ padding: '0px 5px', color: '#48A988', fontSize: isMobile ? '14px' : '20px' }}>vs</span> {teamB}
             </>
         );
-    }
-
-    function getWeekDates() {
-        const today = new Date();
-        const dayOfWeek = today.getDay();
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
-
-        const weekdays = ['월', '화', '수', '목', '금'];
-        const result = [];
-
-        for (let i = 0; i < 5; i++) {
-            const current = new Date(monday);
-            current.setDate(monday.getDate() + i);
-            const month = current.getMonth() + 1;
-            const date = current.getDate();
-            result.push(`${month}/${date} (${weekdays[i]})`);
-        }
-
-        return result;
     }
 
     type WeekDate = {
@@ -106,58 +85,46 @@ export default function WeekMatchPage() {
 
     return (
         <div className="week-match-container">
-            <h1 className="week-title"><span>빅발리볼</span>일정표</h1>
+            <h1 className="week-title">
+                <span>빅발리볼</span>일정표
+            </h1>
 
             <div className="week-info">
-                <p style={{}}>{weekInfo}</p>
+                <p>{weekInfo}</p>
                 <p>6라운드 / 7라운드</p>
             </div>
 
             <table className="match-table">
                 <thead>
                     <tr>
-                        {!isMobile ? (
-                            getWeekDates().map((label, index) => (
-                                <th key={index}>{label}</th>
-                            ))
-                        ) : (
-                            getWeekDates().slice(0, 3).map((label, index) => (
-                                <th key={index}>{label}</th>
+                        {!isMobile && (
+                            getWeekDates2().map(({ date, kor }, index) => (
+                                <th key={index}>{`${date} (${kor})`}</th>
                             ))
                         )}
                     </tr>
                 </thead>
                 <tbody>
                     {!isMobile ? (
-                        <>
-                            <tr className="lunch-match">
-                                {['Monday', 'Tuesday', 'Wednesday', 'Thursday'].map((day, idx) => (
-                                    <td key={idx}>{renderMatch(weeklyMatches[day as Weekday].lunch)}</td>
-                                ))}
-                                <td rowSpan={2} style={{ verticalAlign: 'middle' }}>
-                                    {renderMatch(weeklyMatches.Friday.lunch)}
+                        <tr className="lunch-match">
+                            {getWeekDates2().map(({ eng }, idx) => (
+                                <td key={idx}>{renderMatch(weeklyMatches[eng].lunch)}</td>
+                            ))}
+                        </tr>
+                    ) : (
+                        getWeekDates2().map(({ eng, kor, date }) => (
+                            <tr key={eng} className={`mobile-row ${eng === 'Friday' ? 'friday-row' : ''}`}>
+                                <td className="day-cell">
+                                    <div>
+                                        {date} <br />
+                                        <span style={{ fontSize: "16px", color: "white" }}>{kor}</span>
+                                    </div>
+                                </td>
+                                <td className={`lunch-cell ${eng === 'Friday' ? 'friday-lunch' : ''}`}>
+                                    {renderMatch(weeklyMatches[eng].lunch)}
                                 </td>
                             </tr>
-                        </>
-                    ) : (
-                        <>
-                            {getWeekDates2().map(({ eng, kor, date }) => (
-                                <tr key={eng} className={`mobile-row ${eng === 'Friday' ? 'friday-row' : ''}`}>
-                                    <td className="day-cell">
-                                        <div>
-                                            {date} <br />
-                                            {kor}
-                                        </div>
-                                    </td>
-                                    <td
-                                        className={`lunch-cell ${eng === 'Friday' ? 'friday-lunch' : ''}`}
-                                        colSpan={eng === 'Friday' ? 2 : 1}
-                                    >
-                                        {renderMatch(weeklyMatches[eng as Weekday].lunch)}
-                                    </td>
-                                </tr>
-                            ))}
-                        </>
+                        ))
                     )}
                 </tbody>
             </table>

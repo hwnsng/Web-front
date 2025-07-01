@@ -4,7 +4,7 @@
   width: 100%;
   height: 93vh;
   font-family: Arial, sans-serif;
-  width: 968px;
+  max-width: 968px;
   margin: 0 auto;
   padding: 0px;
   background-color: white;
@@ -31,6 +31,7 @@
   width: 100%;
   text-align: center;
   justify-content: space-between;
+  padding: 10px 0;
 }
 
 .week-info p {
@@ -39,17 +40,17 @@
 }
 
 .match-table {
-  width: 968px;
+  width: 100%;
+  max-width: 968px;
+  border-collapse: collapse;
 }
 
 .match-table th {
-  width: 191px;
   height: 58px;
   background-color: #61DCB2;
   color: white;
   padding: 10px;
   text-align: center;
-  height: 2rem;
   border: 2px solid white;
   font-size: 22px;
   font-weight: bold;
@@ -58,16 +59,12 @@
 .match-table td {
   padding: 10px;
   text-align: center;
-  background-color: #F1F1F1;
+  background-color: #FBFBFB;
   border: 2px solid white;
   height: 8rem;
   color: black;
   font-size: 28px;
   font-weight: bold;
-}
-
-.match-table td span.vs-text {
-  color: #48A988;
 }
 
 td span {
@@ -92,72 +89,72 @@ td span {
 
 @media screen and (max-width: 768px) {
   .week-match-container {
-    display: flex;
+    width: 340px;
     align-items: start;
-    padding-top: 0px;
+    padding: 10px;
+    height: auto;
   }
 
   .week-title {
-    margin: 0;
     font-size: 20px;
-    margin-bottom: 20px;
-  }
-
-  .match-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 200px;
+    margin-bottom: 15px;
   }
 
   .week-info p {
     font-size: 12px;
   }
 
+  .match-table {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
   .match-table th {
-    display: none;
-  }
-
-  .match-table td {
-    width: 120px;
-    height: 82px;
-    padding: 12px;
-    border: 2px solid white;
-    text-align: center;
-  }
-
-  td.day-cell {
-    width: 58px;
-    height: 82px;
-    background-color: #61DCB2;
-    color: white;
-    font-weight: bold;
+    height: 40px;
     font-size: 16px;
   }
 
+  .match-table td {
+    width: 58px;
+    height: 82px;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  td.day-cell {
+    width: 80px;
+    background-color: #61DCB2;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
   td.lunch-cell {
-    width: 40%;
-    background-color: #F1F1F1;
-    font-size: 17px;
+    width: calc(100% - 80px);
+    font-size: 16px;
+
+    span {
+      font-size: 12px;
+    }
   }
 
   .friday-lunch {
-    width: 80% !important;
-    position: relative;
+    width: calc(100% - 80px);
   }
 
   .match-table tr:first-child td:first-child {
-    border-top-left-radius: 15px;
+    border-top-left-radius: 10px;
   }
 
   .match-table tr:first-child td:last-child {
-    border-top-right-radius: 15px;
+    border-top-right-radius: 10px;
   }
 
   .match-table tr:last-child td:first-child {
-    border-bottom-left-radius: 15px;
+    border-bottom-left-radius: 10px;
   }
 
   .match-table tr:last-child .friday-lunch {
-    border-bottom-right-radius: 15px;
+    border-bottom-right-radius: 10px;
   }
 }
