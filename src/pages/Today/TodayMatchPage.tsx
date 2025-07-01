@@ -41,7 +41,7 @@ export default function TodayMatchPage() {
       <div className="wrap">
         <div className="match-container">
           <div className="top-box">
-            <div className="title-box">점심 경기</div>
+            <div className="title-box">오늘 경기</div>
             <div className="class-title-box">
               {left.name}
               <span>VS</span>
