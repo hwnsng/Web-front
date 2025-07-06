@@ -4,7 +4,7 @@
     justify-content: center;
     height: auto;
     box-sizing: border-box;
-    padding-top: 120px;
+    padding-top: 100px;
 }
 
 .login-left {
@@ -16,8 +16,8 @@
 }
 
 .login-img {
-    width: 300px;
-    height: auto;
+    width: 227px;
+    height: 376px;
 }
 
 .login-right {
@@ -28,22 +28,26 @@
 }
 
 .login-box {
+    display: flex;
     background-color: #F8F8F8;
-    padding: 30px 40px;
     border-radius: 20px;
-    width: 100%;
-    max-width: 600px;
-    height: 75vh;
+    width: 568px;
+    height: 600px;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-in-box {
+    width: 452px;
+    height: 500px;
     text-align: center;
 }
 
-
-/* 로고 부분 */
 .login-logo {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .login-logo img {
@@ -62,17 +66,15 @@
     color: #48A988;
 }
 
-/* 로그인 텍스트 */
 .login-title {
     font-size: 32px;
     font-weight: bold;
     color: #48A988;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
-/* 입력 그룹 */
 .input-group {
-    margin-bottom: 36px;
+    margin-bottom: 50px;
     position: relative;
 }
 
@@ -80,7 +82,7 @@
     width: 100%;
     border: none;
     padding: 14px 8px;
-    font-size: 18px;
+    font-size: 20px;
     outline: none;
     background-color: transparent;
 }
@@ -96,9 +98,9 @@
     height: 2px;
 }
 
-/* 로그인 버튼 */
 .login-button {
     background-color: #61DCB2;
+    margin-top: 143px;
     border: none;
     border-radius: 12px;
     color: white;
@@ -142,7 +144,7 @@
         border-radius: 20px;
         width: 80%;
         max-width: 450px;
-        max-height: 500px;
+        max-height: 550px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         text-align: center;
     }

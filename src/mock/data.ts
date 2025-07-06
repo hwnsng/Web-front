@@ -10,7 +10,6 @@ function createTeam(name: string, win: number, lose: number, winScore: number, l
   };
 }
 
-//승 패 득점 실점
 export const TeamInfo = [
   createTeam("1-1", 3, 2, 7, 5),
   createTeam("1-2", 4, 2, 8, 6),
@@ -26,19 +25,20 @@ export const TeamInfo = [
   createTeam("3-4", 3, 2, 6, 4),
 ];
 
+//recent1이 가장 최근경기, recent5가 가장 오래된 경기
 export const RecentMatch = [
   { name: "1-1", recent1: "승", recent2: "패", recent3: "패", recent4: "승", recent5: "승" },
-  { name: "1-2", recent1: "패", recent2: "승", recent3: "승", recent4: "패", recent5: "승" },
+  { name: "1-2", recent1: "패", recent2: "승", recent3: "패", recent4: "승", recent5: "승" },
   { name: "1-3", recent1: "패", recent2: "패", recent3: "패", recent4: "패", recent5: "패" },
   { name: "1-4", recent1: "패", recent2: "패", recent3: "패", recent4: "패", recent5: "패" },
   { name: "2-1", recent1: "승", recent2: "승", recent3: "승", recent4: "승", recent5: "승" },
-  { name: "2-2", recent1: "승", recent2: "패", recent3: "승", recent4: "승", recent5: "패" },
-  { name: "2-3", recent1: "패", recent2: "승", recent3: "승", recent4: "패", recent5: "패" },
-  { name: "2-4", recent1: "승", recent2: "승", recent3: "패", recent4: "승", recent5: "패" },
-  { name: "3-1", recent1: "승", recent2: "패", recent3: "패", recent4: "패", recent5: "패" },
-  { name: "3-2", recent1: "승", recent2: "승", recent3: "패", recent4: "패", recent5: "승" },
+  { name: "2-2", recent1: "패", recent2: "승", recent3: "승", recent4: "패", recent5: "승" },
+  { name: "2-3", recent1: "패", recent2: "승", recent3: "패", recent4: "승", recent5: "패" },
+  { name: "2-4", recent1: "패", recent2: "승", recent3: "승", recent4: "승", recent5: "패" },
+  { name: "3-1", recent1: "패", recent2: "패", recent3: "패", recent4: "패", recent5: "승" },
+  { name: "3-2", recent1: "승", recent2: "패", recent3: "패", recent4: "승", recent5: "패" },
   { name: "3-3", recent1: "승", recent2: "승", recent3: "승", recent4: "승", recent5: "승" },
-  { name: "3-4", recent1: "패", recent2: "승", recent3: "패", recent4: "승", recent5: "패" },
+  { name: "3-4", recent1: "승", recent2: "패", recent3: "승", recent4: "패", recent5: "승" },
 ];
 
 export const WeekMatch = [

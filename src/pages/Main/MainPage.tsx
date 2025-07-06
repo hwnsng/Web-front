@@ -10,10 +10,8 @@ export default function MainPage() {
                 <div className='main-container'>
                     <div className='main-content'>
                         <div className="text-section">
-                            <p className="subtitle">2025 1학기 빅발리볼</p>
-                            <h1 className="main-title">
-                                <span className="highlight">2025 경소마고</span> 교내 리그전
-                            </h1>
+                            <p className="subtitle">1학기 빅발리볼 리그전</p>
+                            <h1 className="main-title"><span className="highlight">2025학년도</span> 학교<br />스포츠 클럽 교내리그전</h1>
                             <div className="image-mobile">
                                 <img src={mainImg} alt="공 사진" />
                             </div>

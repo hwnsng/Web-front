@@ -70,7 +70,6 @@ export default function RankPage(): JSX.Element {
         return '';
     };
 
-    // 각 팀의 행 렌더링
     const renderTeamRow = (team: Team, rank: number) => {
         const rankImage = getRankImage(rank);
 
@@ -82,11 +81,10 @@ export default function RankPage(): JSX.Element {
                 </td>
                 <td className="team-name" style={{ textAlign: "left" }}>{team.name}</td>
                 <td className="total">{team.total}</td>
+                <td className="rev-total">{11 - team.total}</td>
                 <td className="win">{team.win}</td>
                 <td className="lose">{team.lose}</td>
-                <td className="point">{team.point}</td>
                 <td className="winScore">{team.winScore}</td>
-                <td className="loseScore">{team.loseScore}</td>
             </tr>
         );
     };
@@ -96,7 +94,9 @@ export default function RankPage(): JSX.Element {
 
     return (
         <div className="rank-container">
-            <h1 className="page-title"><span>실시간</span> 리그전 순위</h1>
+            <div className="page-title-box">
+                <h1 className="page-title"><span>실시간</span> 리그전 순위</h1>
+            </div>
 
             <div className="tables-container">
                 <table className="rank-table">
@@ -106,11 +106,10 @@ export default function RankPage(): JSX.Element {
                             <th></th>
                             <th></th>
                             <th>경기수</th>
+                            <th>남은 경기</th>
                             <th>승리</th>
                             <th>패배</th>
                             <th>승점</th>
-                            <th>득점</th>
-                            <th>실점</th>
                         </tr>
                     </thead>
                     <tbody>

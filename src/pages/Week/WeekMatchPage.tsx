@@ -86,7 +86,7 @@ export default function WeekMatchPage() {
     return (
         <div className="week-match-container">
             <h1 className="week-title">
-                <span>빅발리볼</span>일정표
+                <span>빅발리볼</span>경기 일정표
             </h1>
 
             <div className="week-info">

@@ -5,12 +5,19 @@
   margin-top: 100px;
 }
 
+.page-title-box {
+  display: flex;
+  width: 100%;
+  justify-content: left;
+}
+
 .page-title {
-  font-size: 2.5rem;
+  font-size: 30px;
   font-weight: bold;
   margin-bottom: 1.5rem;
+  margin-left: -70px;
   text-align: center;
-  z-index: 1000;
+  z-index: 900;
 }
 
 .page-title span {
@@ -44,7 +51,7 @@
 
 .rank-table thead th {
   position: sticky;
-  top: 80px;
+  top: 70px;
   background-color: white;
   z-index: 10;
 }
@@ -93,6 +100,13 @@
 }
 
 @media screen and (max-width: 768px) {
+  .page-title-box {
+    justify-content: center;
+  }
+
+  .page-title {
+    margin-left: 0;
+  }
 
   .rank-table th,
   .rank-table td {
