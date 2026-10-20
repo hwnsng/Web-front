@@ -6,10 +6,13 @@ import RankPage from './pages/Rank/RankPage';
 import TodayMatchPage from './pages/Today/TodayMatchPage';
 import LoginPage from './pages/Login/LoginPage';
 import Header from './components/Header/Header';
+import LeagueProvider from './LeagueProvider';
+import './sports.css';
 
 export default function App() {
   return (
     <Router>
+      <LeagueProvider>
       <Header />
       <Routes>
         <Route path="/" element={<MainPage />} />
@@ -18,6 +21,7 @@ export default function App() {
         <Route path="/loginPage" element={<LoginPage />} />
         <Route path="/todayMatchPage" element={<TodayMatchPage />} />
       </Routes>
+      </LeagueProvider>
     </Router>
   );
 }
