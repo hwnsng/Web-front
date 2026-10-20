@@ -1,54 +1,60 @@
-# React + TypeScript + Vite
+# 경소마고 스포츠 클럽
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript 프런트엔드와 Express + SQLite 백엔드입니다. Node.js 24 이상을 사용합니다.
 
-Currently, two official plugins are available:
+## 로컬 실행
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```sh
+npm install
+# 새 환경에서만 .env.example을 .env로 복사하고 ADMIN_PASSWORD 설정
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Vite의 표시 URL(기본 http://localhost:5173)로 접속합니다. `/api`는 3001번 백엔드로 프록시됩니다.
+현재 작업 환경에는 별도로 생성한 `.env`와 관리자 계정이 준비되어 있습니다. 비밀번호와 DB는 Git에 포함하지 않습니다.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 빌드 및 운영 실행
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```sh
+npm run build
+npm start
 ```
+
+http://localhost:3001에서 프런트엔드와 API를 함께 제공합니다. `.env`의 관리자 비밀번호는 **DB 최초 생성 시에만** 적용됩니다. 기존 DB의 비밀번호를 변경하려면 `npm run admin:password`를 실행합니다. 변경 시 모든 로그인 세션이 해제됩니다.
+
+- `ADMIN_USERNAME`: 최초 관리자 ID, 기본 `admin`
+- `ADMIN_PASSWORD`: 최초 관리자 비밀번호 (10자 이상)
+- `PORT`: 서버 포트, 기본 3001
+- `DATA_DIR`: 영구 DB 디렉터리, 기본 `data`
+- `COOKIE_SECURE=true`: HTTPS 운영 환경에서 설정
+- `APP_ORIGIN`: 리버스 프록시 운영 시 실제 사이트 주소 (예: https://sports.example.com)
+
+백엔드가 SQLite 파일에 저장하므로 영구 디스크가 있는 서버에서 단일 인스턴스로 실행합니다. 기존 Vercel 정적 배포만으로는 API/DB가 동작하지 않습니다. Dockerfile을 제공하며 `/data`에 영구 볼륨을 연결하고 관리자 환경변수를 전달해야 합니다. DB 백업은 서버를 중지한 뒤 `DATA_DIR` 전체를 복사합니다.
+
+## 사용 방법과 계산 규칙
+
+1. 누구나 오늘 경기, 전체 일정, 순위를 조회할 수 있습니다.
+2. 관리자는 로그인 후 경기 일정의 월~금 요일 박스를 누릅니다. 요일을 누르면 바로 두 팀을 12개 반 드롭다운에서 선택하고 시간을 지정할 수 있습니다. 기존 경기 또는 새 경기 추가도 선택할 수 있습니다. 확인·취소 버튼은 각각 저장·취소 확인 모달을 거치며 결과가 입력된 경기의 팀·시간은 변경할 수 없습니다. 기본 참가 팀은 기존 1-1 ~ 3-4, 총 12팀입니다.
+3. 오늘 경기는 한국 시간의 **날짜**로 조회합니다. 매주 같은 요일에 자동 반복하지 않으므로 이전 주 경기 결과와 섞이지 않습니다.
+4. 오늘 경기 또는 일정 카드의 결과 입력에서 `2:0`, `2:1`, `0:2`, `1:2`를 선택합니다. 미래 경기 결과는 입력할 수 없습니다.
+5. 승점은 세트 득 × 3점입니다. 2:0은 6점/0점, 2:1은 6점/3점입니다. 사용자 지정 기준이며 학교 공식 규정으로 별도 확인된 것은 아닙니다.
+6. 득실차는 세트 득실차입니다. 승점 내림차순 → 세트 득실차 내림차순으로 정렬하고 같으면 공동 순위입니다.
+7. 팀당 총 11경기를 진행합니다. 경기 수는 완료 경기 수, 남은 경기는 11에서 완료 경기 수를 뺀 값입니다. 일정 등록 여부와 관계없이 0경기 / 남은 11경기로 시작하며, 결과 저장 시 양 팀 경기 수 +1, 남은 경기 -1, 승/패/승점이 함께 반영됩니다. 11경기 완료 후에는 추가 결과 입력을 차단하며 기존 결과 수정은 가능합니다.
+8. 잘못 입력한 결과는 수정할 수 있습니다. 매번 저장된 결과에서 통계를 재계산하여 중복 집계를 방지합니다. 미완료 일정은 요일 박스에서 수정할 수 있습니다.
+9. 관리자는 순위표 오른쪽 위 수정 버튼으로 편집 모드를 켭니다. 경기 수·승리·패배 옆 − / + 버튼으로 1씩 조절하고 저장하거나 취소할 수 있습니다. 경기 수 변경 시 남은 경기가 반대로 조정되며 0 아래로 내려가지 않습니다. 승점은 실제 세트 득 × 3에 수동 승리 보정 1회당 6점을 더한 값입니다(최소 0점). 경기 수와 패배 변경만으로는 승점이 바뀌지 않습니다. 여러 팀의 보정은 DB에 한 번에 저장하며, 새 결과는 보정값에 이어서 자동 반영됩니다. 실제 세트 점수와 최근 승패 기록은 보존합니다. 편집 중 서버 기록이 바뀌면 저장을 차단해 덮어쓰기를 방지합니다.
+
+관리자 저장 직후 화면 데이터를 갱신하고, 다른 방문자의 화면도 15초 간격 및 창 복귀 시 갱신합니다. 로그인은 서버 측 비밀번호 해시와 8시간 HttpOnly 쿠키 세션을 사용합니다. 모든 쓰기 API에서 관리자 인증을 검사합니다.
+
+## 검증
+
+```sh
+npm test
+npm run build
+npm run lint
+npx playwright install chromium
+npm run test:e2e
+```
+
+API 테스트는 별도 임시 DB에서 권한 차단, 잘못된 입력, 일정 중복, 결과 반영/수정, 재시작 후 영속성을 검증합니다. 브라우저 테스트도 운영 DB와 분리된 DB에서 실행합니다.
+
+API 구현 참고: [Node SQLite](https://nodejs.org/api/sqlite.html), [Express API](https://expressjs.com/en/5x/api/).

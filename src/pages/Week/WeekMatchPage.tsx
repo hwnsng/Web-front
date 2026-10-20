@@ -1,133 +1,48 @@
-import { useState, useEffect } from 'react';
-import '@/pages/Week/WeekMatchPage.css';
-
-type Weekday = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday';
-
-type MatchSchedule = {
-    lunch: string;
-};
-
-type WeeklyMatches = Record<Weekday, MatchSchedule>;
-
+﻿import { useState } from 'react';
+import { useLeague } from '../../league';
+import MatchCard from '../../components/MatchCard';
+import DayScheduleEditor from '../../components/DayScheduleEditor';
+import { Link } from 'react-router-dom';
 export default function WeekMatchPage() {
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth <= 768);
-        };
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    const [weeklyMatches] = useState<WeeklyMatches>({
-        Monday: { lunch: '2-4 vs 1-4' },
-        Tuesday: { lunch: '3-2 vs 1-1' },
-        Wednesday: { lunch: '3-1 vs 1-4' },
-        Thursday: { lunch: '2-3 vs 1-3' },
-        Friday: { lunch: '3-3 vs 1-1' },
-    });
-
-    const today = new Date();
-    const weekInfo = getCurrentMonthAndWeek();
-
-    function getCurrentMonthAndWeek(): string {
-        const month = today.getMonth() + 1;
-        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        const offset = firstDayOfMonth.getDay();
-        const weekNumber = Math.ceil((today.getDate() + offset) / 7);
-        return `${month}월 ${weekNumber}째주`;
-    }
-
-    function renderMatch(match: string | null) {
-        if (!match) return '-';
-        const [teamA, teamB] = match.split(' vs ');
-        return (
-            <>
-                {teamA} <span style={{ padding: '0px 5px', color: '#48A988', fontSize: isMobile ? '14px' : '20px' }}>vs</span> {teamB}
-            </>
-        );
-    }
-
-    type WeekDate = {
-        eng: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday';
-        kor: string;
-        date: string;
-    };
-
-    function getWeekDates2(): WeekDate[] {
-        const today = new Date();
-        const dayOfWeek = today.getDay();
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
-
-        const engDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] as const;
-        const korDays = ['월', '화', '수', '목', '금'];
-
-        const result: WeekDate[] = [];
-
-        for (let i = 0; i < 5; i++) {
-            const current = new Date(monday);
-            current.setDate(monday.getDate() + i);
-            const month = current.getMonth() + 1;
-            const date = current.getDate();
-
-            result.push({
-                eng: engDays[i],
-                kor: korDays[i],
-                date: `${month}/${date}`,
-            });
-        }
-
-        return result;
-    }
-
-    return (
-        <div className="week-match-container">
-            <h1 className="week-title">
-                <span>빅발리볼</span>경기 일정표
-            </h1>
-
-            <div className="week-info">
-                <p>{weekInfo}</p>
-                <p>6라운드 / 7라운드</p>
+  const { data } = useLeague();
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  if (!data) return <main className="sports-page">일정을 불러오는 중입니다.</main>;
+  const monday = new Date(`${data.today}T00:00:00Z`);
+  monday.setUTCDate(monday.getUTCDate() - (monday.getUTCDay() + 6) % 7);
+  const days = ['월', '화', '수', '목', '금'].map((name, index) => {
+    const day = new Date(monday);
+    day.setUTCDate(monday.getUTCDate() + index);
+    return { name, date: day.toISOString().slice(0, 10), label: `${day.getUTCMonth() + 1}/${day.getUTCDate()}` };
+  });
+  const monthStart = new Date(Date.UTC(monday.getUTCFullYear(), monday.getUTCMonth(), 1));
+  const weekNumber = Math.ceil((monday.getUTCDate() + (monthStart.getUTCDay() + 6) % 7) / 7);
+  return <main className="sports-page">
+    <h1><span>스포츠 클럽</span> 경기 일정</h1>
+    <div className="weekly-heading">
+      <div><h2>이번 주 · {monday.getUTCMonth() + 1}월 {weekNumber}주차</h2>
+        <p>{monday.getUTCFullYear()}년 {days[0].label} (월) ~ {days[4].label} (금)</p>
+      </div>
+      <Link className="schedule-link-button" to="/todayMatchPage">오늘 경기 일정 보기</Link>
+    </div>
+    {data.admin && <p className="weekly-admin-help">요일 박스를 눌러 경기 일정을 추가하거나 수정하세요.</p>}
+    <div className="weekly-schedule">
+      {days.map(day => {
+        const matches = data.matches.filter(m => m.date === day.date);
+        const heading = <div className="weekly-day-heading"><h3>{day.name}요일</h3><span>{day.label}</span>{day.date === data.today && <span className="badge">오늘</span>}</div>;
+        return <section key={day.date} className={`weekly-day${day.date === data.today ? ' is-today' : ''}${data.admin ? ' weekly-day-admin' : ''}`} aria-label={`${day.label} ${day.name}요일`}>
+          {data.admin ? <button type="button" className="weekly-day-trigger" aria-label={`${day.name}요일 일정 관리`} aria-haspopup="dialog" onClick={() => setSelectedDate(day.date)}>
+            {heading}
+            <div className="weekly-day-content">
+              {matches.length ? matches.map(match => <div className="weekly-match-preview" key={match.id}>
+                <span className="weekly-match-time">{match.time} · {match.homeSets === null ? '예정' : '종료'}</span>
+                <strong>{match.home} <span>{match.homeSets === null ? 'VS' : `${match.homeSets}:${match.awaySets}`}</span> {match.away}</strong>
+              </div>) : <div className="weekly-no-match"><span>+<br />경기 일정 추가</span></div>}
+              {matches.length > 0 && <span className="weekly-edit-hint">일정 관리 ↗</span>}
             </div>
-
-            <table className="match-table">
-                <thead>
-                    <tr>
-                        {!isMobile && (
-                            getWeekDates2().map(({ date, kor }, index) => (
-                                <th key={index}>{`${date} (${kor})`}</th>
-                            ))
-                        )}
-                    </tr>
-                </thead>
-                <tbody>
-                    {!isMobile ? (
-                        <tr className="lunch-match">
-                            {getWeekDates2().map(({ eng }, idx) => (
-                                <td key={idx}>{renderMatch(weeklyMatches[eng].lunch)}</td>
-                            ))}
-                        </tr>
-                    ) : (
-                        getWeekDates2().map(({ eng, kor, date }) => (
-                            <tr key={eng} className={`mobile-row ${eng === 'Friday' ? 'friday-row' : ''}`}>
-                                <td className="day-cell">
-                                    <div>
-                                        {date} <br />
-                                        <span style={{ fontSize: "16px", color: "white" }}>{kor}</span>
-                                    </div>
-                                </td>
-                                <td className={`lunch-cell ${eng === 'Friday' ? 'friday-lunch' : ''}`}>
-                                    {renderMatch(weeklyMatches[eng].lunch)}
-                                </td>
-                            </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
-        </div>
-    );
+          </button> : <>{heading}<div className="weekly-day-content">{matches.length ? matches.map(m => <MatchCard key={m.id} match={m} />) : <p className="weekly-no-match">예정된 경기가 없습니다.</p>}</div></>}
+        </section>;
+      })}
+    </div>
+    {data.admin && selectedDate && <DayScheduleEditor key={selectedDate} date={selectedDate} matches={data.matches.filter(match => match.date === selectedDate)} onClose={() => setSelectedDate(null)} />}
+  </main>;
 }

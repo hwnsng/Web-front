@@ -1,8 +1,10 @@
 import '@/components/Header/Header.css';
 import gbswLogo from '@/media/logo.png';
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLeague } from '../../league';
 
 export default function Header() {
+  const { data } = useLeague();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -26,7 +28,7 @@ export default function Header() {
           <Link to="/rankPage" className={location.pathname === "/rankPage" ? "active" : ""}>순위</Link>
         </div>
         <div className="nav-item">
-          {<Link to="/loginPage" className={location.pathname === "/loginPage" ? "active" : ""}>로그인</Link>}
+          {<Link to="/loginPage" className={location.pathname === "/loginPage" ? "active" : ""}>{data?.admin ? '관리자' : '로그인'}</Link>}
         </div>
       </div>
     </div>
