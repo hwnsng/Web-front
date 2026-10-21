@@ -6,10 +6,10 @@
 .sports-page .weekly-day-trigger { display: block; width: 100%; height: 100%; padding: 0; border-radius: 0; background: transparent; color: #202226; text-align: left; }
 .sports-page .weekly-day-trigger:hover:not(:disabled) { background: #eceef1; }
 .sports-page .weekly-day-trigger:focus-visible { outline-offset: -4px; }
-.weekly-match-preview { padding: 16px 10px; margin-bottom: 10px; background: #fff; border: 1px solid #e2e4e8; border-radius: 10px; }
-.weekly-match-time { display: block; color: #747981; font-size: 12px; margin-bottom: 12px; }
-.weekly-match-preview > strong { display: block; font-size: 18px; }
-.weekly-match-preview > strong > span { font-size: 13px; color: #747981; margin: 0 3px; }
+.weekly-match-preview { display: flex; align-items: center; justify-content: center; min-height: 210px; padding: 20px 4px; }
+.weekly-match-preview > strong { display: flex; align-items: center; justify-content: center; gap: 12px; white-space: nowrap; }
+.weekly-match-preview .weekly-team { font-size: clamp(28px, 2.6vw, 40px); font-weight: 800; letter-spacing: -.04em; }
+.weekly-match-preview .weekly-versus { font-size: 13px; color: #92969d; font-weight: 600; }
 .weekly-edit-hint { display: block; text-align: center; color: #747981; font-size: 12px; padding: 10px; }
 .day-editor-dialog { width: min(460px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); padding: 28px; border: 1px solid #e2e4e8; border-radius: 18px; color: #202226; background: white; box-shadow: 0 24px 80px #0002; }
 .day-editor-dialog::backdrop { background: #14171b66; }
@@ -46,7 +46,8 @@
 .sports-page button.secondary:hover:not(:disabled) { background: #dfe2e6; }
 .sports-page button:focus-visible, .sports-page input:focus-visible, .sports-page select:focus-visible { outline: 2px solid #626873; outline-offset: 3px; }
 .sports-card { padding: 26px; border: 1px solid #e2e4e8; border-radius: 16px; background: #fff; margin: 18px 0; box-shadow: 0 4px 18px #20222607; }
-.sports-card h2 { margin: 16px 0; font-size: 26px; }
+.sports-card h2 { margin: 8px 0 24px; font-size: clamp(36px, 4vw, 48px); font-weight: 800; letter-spacing: -.04em; }
+.sports-card h2 .vs { font-size: .65em; font-weight: 600; color: #747981; }
 .vs { margin: 0 16px; }
 .match-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 390px), 1fr)); gap: 20px; }
 .match-meta, .muted { color: #747981; font-size: 14px; }
@@ -73,9 +74,10 @@
 .weekly-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin: 24px 0; }
 .weekly-heading h2 { margin: 0; font-size: 23px; }
 .weekly-heading p { margin: 8px 0 0; color: #747981; }
-.weekly-schedule { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-top: 28px; }
-.weekly-day { min-width: 0; border: 1px solid #e2e4e8; border-radius: 14px; overflow: hidden; background: #fafbfc; }
-.weekly-day.is-today { border: 2px solid #24262a; }
+.weekly-schedule { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px; margin-top: 40px; padding: 8px; }
+.weekly-day { min-width: 0; border: none; border-radius: 14px; overflow: hidden; background: #fafbfc; }
+.weekly-day.is-today { transform: scale(1.05); position: relative; z-index: 1; box-shadow: 0 12px 32px #20222618; background: #fff; }
+.weekly-day.is-today .weekly-day-heading { background: #e8eaed; }
 .weekly-day-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 18px 12px; background: #f0f1f3; }
 .weekly-day-heading h3 { margin: 0; font-size: 18px; }
 .weekly-day-heading .badge { margin: 0; padding: 3px 8px; background: #24262a; color: white; font-size: 12px; }
@@ -92,6 +94,9 @@
 .weekly-day .admin-actions select { width: 100%; min-width: 0; }
 @media(max-width: 900px) {
   .weekly-schedule { grid-template-columns: 1fr; }
+  .weekly-day.is-today { transform: scale(1.02); }
+  .weekly-match-preview { min-height: 110px; }
+  .weekly-match-preview .weekly-team { font-size: 36px; }
   .weekly-day { display: grid; grid-template-columns: 96px minmax(0, 1fr); }
   .weekly-day-heading { flex-direction: column; justify-content: center; }
   .weekly-day-content { min-height: 130px; }

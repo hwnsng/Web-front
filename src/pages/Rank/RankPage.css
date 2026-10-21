@@ -24,15 +24,17 @@
 .standings-table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 650px; text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .standings-table thead th { padding: 15px 12px; background: #f5f6f7; border-bottom: 1px solid #e5e7eb; font-size: 12px; font-weight: 600; color: #686d75; }
 .standings-table thead th:first-child { width: 76px; }
-.standings-table thead th:nth-child(2) { text-align: left; width: 155px; }
+.standings-table thead th:nth-child(2) { text-align: center; width: 155px; }
 .standings-table tbody td, .standings-table tbody th { height: 70px; padding: 13px 12px; border-bottom: 1px solid #eceef0; background: #fff; font-size: 15px; transition: background .15s; }
 .standings-table tbody tr:nth-child(even) > * { background: #fafbfc; }
 .standings-table tbody tr:last-child > * { border-bottom: 0; }
 .standings-table tbody tr:hover > * { background: #f0f1f3; }
 .position-number { display: inline-flex; width: 33px; height: 33px; align-items: center; justify-content: center; font-size: 17px; font-weight: 750; color: #858a93; letter-spacing: -.04em; }
-.position-number.podium-position { background: #22252a; color: white; border-radius: 8px; }
-.standings-table .standings-team { text-align: left; font-size: 17px; font-weight: 750; }
-.team-shield { display: inline-flex; vertical-align: middle; align-items: center; justify-content: center; width: 32px; height: 36px; margin-right: 12px; background: #eceef1; color: #535861; font-size: 10px; font-weight: 800; clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%); }
+.position-number.podium-position { border-radius: 8px; }
+.position-number.podium-1 { background: #f9e6a7; color: #795600; }
+.position-number.podium-2 { background: #e2e8f0; color: #475569; }
+.position-number.podium-3 { background: #f1d5bf; color: #854c28; }
+.standings-table .standings-team { text-align: center; font-size: 22px; font-weight: 750; }
 .standings-table .standings-secondary { color: #777d86; }
 .standings-table .standings-wins, .standings-table .standings-difference { font-weight: 650; }
 .standings-table thead .standings-points { background: #e9ebee; color: #18191c; font-weight: 800; }
@@ -52,7 +54,6 @@
   .standings-table thead th:first-child, .standings-table thead th:nth-child(2) { z-index: 3; }
   .standings-table thead th, .standings-table tbody td, .standings-table tbody th { padding-left: 10px; padding-right: 10px; }
   .standings-table tbody td, .standings-table tbody th { height: 62px; }
-  .team-shield { margin-right: 8px; width: 27px; height: 31px; }
   .standings-footer { padding: 15px 18px; }
   .standings-scroll-hint { display: inline; }
 }

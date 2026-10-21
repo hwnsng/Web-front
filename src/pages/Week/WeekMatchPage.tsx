@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { MATCH_TIME_LABEL, useLeague } from '../../league';
-import MatchCard from '../../components/MatchCard';
+import { useLeague } from '../../league';
 import DayScheduleEditor from '../../components/DayScheduleEditor';
 import { Link } from 'react-router-dom';
 export default function WeekMatchPage() {
@@ -16,7 +15,7 @@ export default function WeekMatchPage() {
   });
   const monthStart = new Date(Date.UTC(monday.getUTCFullYear(), monday.getUTCMonth(), 1));
   const weekNumber = Math.ceil((monday.getUTCDate() + (monthStart.getUTCDay() + 6) % 7) / 7);
-  return <main className="sports-page">
+  return <main className="sports-page weekly-page">
     <h1><span>스포츠 클럽</span> 경기 일정</h1>
     <div className="weekly-heading">
       <div><h2>이번 주 · {monday.getUTCMonth() + 1}월 {weekNumber}주차</h2>
@@ -28,18 +27,18 @@ export default function WeekMatchPage() {
     <div className="weekly-schedule">
       {days.map(day => {
         const matches = data.matches.filter(m => m.date === day.date);
+        const content = <div className="weekly-day-content">
+          {matches.length ? matches.map(match => <div className="weekly-match-preview" key={match.id}>
+            <strong><span className="weekly-team">{match.home}</span><span className="weekly-versus">VS</span><span className="weekly-team">{match.away}</span></strong>
+          </div>) : <div className="weekly-no-match">{data.admin ? <span>+<br />경기 일정 추가</span> : '예정된 경기가 없습니다.'}</div>}
+          {data.admin && matches.length > 0 && <span className="weekly-edit-hint">일정 관리 ↗</span>}
+        </div>;
         const heading = <div className="weekly-day-heading"><h3>{day.name}요일</h3><span>{day.label}</span>{day.date === data.today && <span className="badge">오늘</span>}</div>;
         return <section key={day.date} className={`weekly-day${day.date === data.today ? ' is-today' : ''}${data.admin ? ' weekly-day-admin' : ''}`} aria-label={`${day.label} ${day.name}요일`}>
           {data.admin ? <button type="button" className="weekly-day-trigger" aria-label={`${day.name}요일 일정 관리`} aria-haspopup="dialog" onClick={() => setSelectedDate(day.date)}>
             {heading}
-            <div className="weekly-day-content">
-              {matches.length ? matches.map(match => <div className="weekly-match-preview" key={match.id}>
-                <span className="weekly-match-time">{MATCH_TIME_LABEL} · {match.homeSets === null ? '예정' : '종료'}</span>
-                <strong>{match.home} <span>{match.homeSets === null ? 'VS' : `${match.homeSets}:${match.awaySets}`}</span> {match.away}</strong>
-              </div>) : <div className="weekly-no-match"><span>+<br />경기 일정 추가</span></div>}
-              {matches.length > 0 && <span className="weekly-edit-hint">일정 관리 ↗</span>}
-            </div>
-          </button> : <>{heading}<div className="weekly-day-content">{matches.length ? matches.map(m => <MatchCard key={m.id} match={m} />) : <p className="weekly-no-match">예정된 경기가 없습니다.</p>}</div></>}
+            {content}
+          </button> : <>{heading}{content}</>}
         </section>;
       })}
     </div>
