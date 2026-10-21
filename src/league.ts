@@ -1,4 +1,4 @@
-﻿import { createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 export interface Match { id: number; date: string; time: string; home: string; away: string; homeSets: number | null; awaySets: number | null }
 export interface Team { name: string; rank: number; total: number; remaining: number; win: number; lose: number; point: number; winScore: number; loseScore: number; difference: number; recent: string[] }
 export interface State { admin: boolean; today: string; teams: string[]; matches: Match[]; standings: Team[] }
@@ -11,3 +11,6 @@ export async function api(url: string, method = 'GET', body?: unknown) {
   return result;
 }
 export const dateLabel = (date: string, includeYear = false) => new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', ...(includeYear ? { year: 'numeric' as const } : {}), month: 'long', day: 'numeric', weekday: 'long' }).format(new Date(`${date}T12:00:00+09:00`));
+
+export const MATCH_TIME = '12:50';
+export const MATCH_TIME_LABEL = '12:50 ~ 13:30';

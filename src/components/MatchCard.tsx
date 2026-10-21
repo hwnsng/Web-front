@@ -1,5 +1,5 @@
-﻿import { useState } from 'react';
-import { api, dateLabel, useLeague, type Match } from '../league';
+import { useState } from 'react';
+import { api, MATCH_TIME_LABEL, dateLabel, useLeague, type Match } from '../league';
 export default function MatchCard({ match }: { match: Match }) {
   const { data, refresh } = useLeague();
   const [editing, setEditing] = useState(false);
@@ -24,7 +24,7 @@ export default function MatchCard({ match }: { match: Match }) {
     finally { setBusy(false); }
   }
   return <article className="sports-card">
-    <div className="match-meta">{dateLabel(match.date)} · {match.time} <span className="badge">{completed ? '경기 종료' : '예정'}</span></div>
+    <div className="match-meta">{dateLabel(match.date)} · {MATCH_TIME_LABEL} <span className="badge">{completed ? '경기 종료' : '예정'}</span></div>
     <h2>{match.home} <span className="vs">{completed ? `${match.homeSets} : ${match.awaySets}` : 'VS'}</span> {match.away}</h2>
     {completed && <p>{(match.homeSets ?? 0) > (match.awaySets ?? 0) ? match.home : match.away} 승리 · 세트 득실차 {Math.abs((match.homeSets ?? 0) - (match.awaySets ?? 0))}</p>}
     <div className="team-comparison">{[match.home, match.away].map(name => {

@@ -46,11 +46,13 @@ test('admin schedules a match, records result, and ranking updates on desktop an
   await page.locator('.weekly-day.is-today').getByRole('button').click();
   await expect(page.getByLabel('팀 A').locator('option')).toHaveCount(12);
   await expect(page.getByLabel('팀 B').locator('option')).toHaveCount(12);
-  await page.getByLabel('시작 시간').fill('12:50');
+  await expect(page.getByLabel('시작 시간')).toHaveCount(0);
+  await page.getByLabel('팀 B').selectOption('1-3');
   await page.getByRole('button', { name: '확인', exact: true }).click();
   await page.getByRole('button', { name: '저장 확인' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.locator('.weekly-day.is-today')).toContainText('12:50');
+  await expect(page.locator('.weekly-day.is-today')).toContainText('12:50 ~ 13:30');
+  await expect(page.locator('.weekly-day.is-today')).toContainText('1-3');
   await page.screenshot({ path: 'test-results/weekly-admin-desktop.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('.weekly-day.is-today').getByRole('button').click();

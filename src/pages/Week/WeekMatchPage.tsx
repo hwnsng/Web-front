@@ -1,5 +1,5 @@
-﻿import { useState } from 'react';
-import { useLeague } from '../../league';
+import { useState } from 'react';
+import { MATCH_TIME_LABEL, useLeague } from '../../league';
 import MatchCard from '../../components/MatchCard';
 import DayScheduleEditor from '../../components/DayScheduleEditor';
 import { Link } from 'react-router-dom';
@@ -34,7 +34,7 @@ export default function WeekMatchPage() {
             {heading}
             <div className="weekly-day-content">
               {matches.length ? matches.map(match => <div className="weekly-match-preview" key={match.id}>
-                <span className="weekly-match-time">{match.time} · {match.homeSets === null ? '예정' : '종료'}</span>
+                <span className="weekly-match-time">{MATCH_TIME_LABEL} · {match.homeSets === null ? '예정' : '종료'}</span>
                 <strong>{match.home} <span>{match.homeSets === null ? 'VS' : `${match.homeSets}:${match.awaySets}`}</span> {match.away}</strong>
               </div>) : <div className="weekly-no-match"><span>+<br />경기 일정 추가</span></div>}
               {matches.length > 0 && <span className="weekly-edit-hint">일정 관리 ↗</span>}
