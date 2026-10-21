@@ -6,20 +6,22 @@ export default function WeekMatchPage() {
   const { data } = useLeague();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   if (!data) return <main className="sports-page">일정을 불러오는 중입니다.</main>;
-  const monday = new Date(`${data.today}T00:00:00Z`);
-  monday.setUTCDate(monday.getUTCDate() - (monday.getUTCDay() + 6) % 7);
+  const sunday = new Date(`${data.today}T00:00:00Z`);
+  sunday.setUTCDate(sunday.getUTCDate() - sunday.getUTCDay());
+  const saturday = new Date(sunday);
+  saturday.setUTCDate(sunday.getUTCDate() + 6);
   const days = ['월', '화', '수', '목', '금'].map((name, index) => {
-    const day = new Date(monday);
-    day.setUTCDate(monday.getUTCDate() + index);
+    const day = new Date(sunday);
+    day.setUTCDate(sunday.getUTCDate() + index + 1);
     return { name, date: day.toISOString().slice(0, 10), label: `${day.getUTCMonth() + 1}/${day.getUTCDate()}` };
   });
-  const monthStart = new Date(Date.UTC(monday.getUTCFullYear(), monday.getUTCMonth(), 1));
-  const weekNumber = Math.ceil((monday.getUTCDate() + (monthStart.getUTCDay() + 6) % 7) / 7);
+  const monthStart = new Date(Date.UTC(sunday.getUTCFullYear(), sunday.getUTCMonth(), 1));
+  const weekNumber = Math.ceil((sunday.getUTCDate() + monthStart.getUTCDay()) / 7);
   return <main className="sports-page weekly-page">
     <h1><span>스포츠 클럽</span> 경기 일정</h1>
     <div className="weekly-heading">
-      <div><h2>이번 주 · {monday.getUTCMonth() + 1}월 {weekNumber}주차</h2>
-        <p>{monday.getUTCFullYear()}년 {days[0].label} (월) ~ {days[4].label} (금)</p>
+      <div><h2>이번 주 · {sunday.getUTCMonth() + 1}월 {weekNumber}주차</h2>
+        <p>{sunday.getUTCFullYear()}년 {sunday.getUTCMonth() + 1}/{sunday.getUTCDate()} (일) ~ {saturday.getUTCMonth() + 1}/{saturday.getUTCDate()} (토)</p>
       </div>
       <Link className="schedule-link-button" to="/todayMatchPage">오늘 경기 일정 보기</Link>
     </div>

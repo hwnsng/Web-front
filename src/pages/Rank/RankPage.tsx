@@ -77,7 +77,7 @@ export default function RankPage() {
         </table>
         {!data && <p className="standings-loading" role="status">순위를 불러오는 중입니다.</p>}
       </div>
-      <div className="standings-footer"><span>기본 일정은 팀당 11경기이며, 관리자 수정 사항이 반영됩니다.</span><span className="standings-scroll-hint">좌우로 밀어 전체 기록 보기 ↔</span></div>
+      <div className="standings-footer"><span>기본 일정은 팀당 11경기입니다.</span><span className="standings-scroll-hint">좌우로 밀어 전체 기록 보기 ↔</span></div>
     </section>
   </main>;
 }
