@@ -68,8 +68,8 @@ export default function RankPage() {
           <caption className="standings-sr-only">팀별 경기 수, 남은 경기 수, 승리, 패배, 승점</caption>
           <thead><tr>{['순위', '팀', '경기 수', '남은 경기 수', '승리', '패배', '승점'].map((title, index) => <th scope="col" key={title} className={index === 6 ? 'standings-points' : ''}>{title}</th>)}</tr></thead>
           <tbody>{rows.map(team => <tr key={team.name} className={team.rank <= 3 && team.total > 0 ? 'standings-top-team' : ''}>
-            <td className="standings-position"><span className={`position-number${team.rank <= 3 && team.total > 0 ? ' podium-position' : ''}`}>{String(team.rank).padStart(2, '0')}</span></td>
-            <th scope="row" className="standings-team"><span className="team-shield" aria-hidden="true">{team.name}</span><span>{team.name}</span></th>
+            <td className="standings-position"><span className={`position-number${team.rank <= 3 && team.total > 0 ? ` podium-position podium-${team.rank}` : ''}`}>{String(team.rank).padStart(2, '0')}</span></td>
+            <th scope="row" className="standings-team">{team.name}</th>
             <td>{numberCell(team, 'total')}</td><td className="standings-secondary">{team.remaining}</td>
             <td className="standings-wins">{numberCell(team, 'win')}</td><td className="standings-secondary">{numberCell(team, 'lose')}</td>
             <td className="standings-points"><strong>{team.point}</strong></td>
