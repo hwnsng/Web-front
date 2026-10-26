@@ -1,4 +1,8 @@
 .standings-page { color: #18191c; }
+.season-tabs { display: flex; gap: 6px; width: fit-content; padding: 5px; margin-bottom: 20px; background: #f0f2f1; border-radius: 12px; }
+.sports-page .season-tabs button { padding: 10px 28px; background: transparent; color: #747981; border-radius: 8px; font-size: 15px; font-weight: 700; }
+.sports-page .season-tabs button[aria-selected="true"] { background: var(--club-accent); color: #fff; box-shadow: 0 2px 6px #28775a20; }
+.sports-page .season-tabs button:hover:not(:disabled):not([aria-selected="true"]) { background: #e2e9e5; color: var(--club-accent); }
 .standings-edit-actions { display: flex; gap: 8px; }
 .sports-page .standings-edit-actions button { font-size: 13px; padding: 9px 18px; }
 .standings-edit-help { margin: 0; padding: 14px 24px; font-size: 13px; background: #f5f6f7; color: #626873; }
@@ -31,6 +35,7 @@
 .standings-table tbody tr:hover > * { background: #f1f7f4; }
 .position-number { display: inline-flex; width: 33px; height: 33px; align-items: center; justify-content: center; font-size: 17px; font-weight: 750; color: #858a93; letter-spacing: -.04em; }
 .position-number.podium-position { border-radius: 8px; }
+.shared-rank-label { display: block; margin-top: 3px; color: #747981; font-size: 10px; line-height: 1.2; }
 .position-number.podium-1 { background: #f9e6a7; color: #795600; }
 .position-number.podium-2 { background: #e2e8f0; color: #475569; }
 .position-number.podium-3 { background: #f1d5bf; color: #854c28; }

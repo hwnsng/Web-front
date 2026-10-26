@@ -4,8 +4,11 @@ import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'node:crypt
 import { mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 import { teams, matchesPerTeam, standings, validResult, koreaDate } from './league.mjs';
 import { matchHistory, applyResultChanges, resultChanges } from './history.mjs';
+import { activeSeason, initializeSeasons } from './seasons.mjs';
+import { seed2026Sample, rebalance2026Sample } from './sample2026.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataDir = process.env.DATA_DIR || path.join(root, 'data');
@@ -26,6 +29,11 @@ for (const column of ['winSets', 'loseSets']) {
   if (!db.prepare('PRAGMA table_info(standing_adjustments)').all().some(field => field.name === column)) {
     db.exec(`ALTER TABLE standing_adjustments ADD COLUMN ${column} INTEGER NOT NULL DEFAULT 0`);
   }
+}
+initializeSeasons(db, path.join(dataDir, 'backups'));
+if (process.env.SEED_2026_SAMPLE !== 'false') {
+  seed2026Sample(db, path.join(dataDir, 'backups'));
+  rebalance2026Sample(db, path.join(dataDir, 'backups'));
 }
 if (!db.prepare('SELECT 1 FROM admin LIMIT 1').get()) {
   const password = process.env.ADMIN_PASSWORD;
@@ -64,6 +72,9 @@ app.disable('x-powered-by');
 app.use(express.json({ limit: '8kb' }));
 app.use('/api', (req, res, next) => {
   res.set('Cache-Control', 'no-store');
+  if (!['GET', 'HEAD'].includes(req.method) && req.body?.season !== undefined && req.body.season !== activeSeason) {
+    return res.status(400).json({ error: '종료된 시즌의 기록은 변경할 수 없습니다.' });
+  }
   if (!['GET', 'HEAD'].includes(req.method) && req.get('Origin') && req.get('Origin') !== `${req.protocol}://${req.get('host')}` && req.get('Origin') !== process.env.APP_ORIGIN) {
     return res.status(403).json({ error: '허용되지 않은 요청입니다.' });
   }
@@ -105,7 +116,11 @@ app.post('/api/logout', (req, res) => {
 });
 app.get('/api/state', (req, res) => {
   const matches = db.prepare('SELECT * FROM matches ORDER BY date,time,id').all();
-  res.json({ admin: !!session(req), today: koreaDate(), teams, matches, standings: currentStandings(matches) });
+  const current = currentStandings(matches);
+  const archives = db.prepare('SELECT year,estimated,standings FROM season_archives ORDER BY year').all()
+    .map(row => ({ year: row.year, estimated: !!row.estimated, standings: JSON.parse(row.standings) }));
+  res.json({ admin: !!session(req), today: koreaDate(), teams, matches, standings: current, activeSeason,
+    seasons: [...archives, { year: activeSeason, estimated: false, standings: current }] });
 });
 app.put('/api/standings', adminOnly, (req, res) => {
   const updates = req.body?.teams;
@@ -241,7 +256,8 @@ app.use((error, _req, res, _next) => {
   console.error(error.message);
   res.status(error.status || 500).json({ error: '요청을 처리하지 못했습니다.' });
 });
-const port = Number(process.env.PORT || 3001);
+const { values } = parseArgs({ options: { port: { type: 'string' } } });
+const port = Number(values.port ?? process.env.PORT ?? 3001);
 app.listen(port, '0.0.0.0', error => {
   if (error) {
     console.error(error.code === 'EADDRINUSE'
