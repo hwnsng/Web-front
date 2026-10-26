@@ -1,11 +1,10 @@
 ﻿import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { api, useLeague } from '../../league';
 import './LoginPage.css';
 import logo from '@/media/logo.png';
 export default function LoginPage() {
   const { data, refresh } = useLeague();
-  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -13,7 +12,7 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setError('');
-    try { await api('/login', 'POST', { username, password }); await refresh(); navigate('/weekMatchPage'); }
+    try { await api('/login', 'POST', { username, password }); await refresh(); setPassword(''); }
     catch { setError('정보가 잘못되었습니다.'); }
     finally { setBusy(false); }
   }

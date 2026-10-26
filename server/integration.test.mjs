@@ -137,7 +137,7 @@ test('authentication, schedule, results, corrections and persistent storage', as
     assert.deepEqual([corrected.total,corrected.remaining,corrected.win,corrected.lose,corrected.point], [8,3,4,4,24]);
     assert.equal(state.matches.find(m => m.id === followup.id).awaySets, 2);
     const other = state.standings.find(t => t.name === '3-4');
-    const batch = { teams: [{ ...corrected, total: corrected.total + 1, remaining: corrected.remaining - 1, win: corrected.win + 1, expected: corrected }, { ...other, total: other.total + 1, remaining: other.remaining - 1, expected: other }] };
+    const batch = { teams: [{ ...corrected, total: corrected.total + 1, remaining: corrected.remaining - 1, win: corrected.win + 1, winScore: corrected.winScore + 2, expected: corrected }, { ...other, total: other.total + 1, remaining: other.remaining - 1, expected: other }] };
     assert.equal((await request('/standings', 'PUT', { teams: [batch.teams[0], { ...batch.teams[1], total: 0 }] })).status, 400);
     assert.equal((await request('/standings', 'PUT', batch, false)).status, 401);
     assert.equal((await request('/standings', 'PUT', { teams: [batch.teams[0], batch.teams[0]] })).status, 400);
@@ -152,6 +152,59 @@ test('authentication, schedule, results, corrections and persistent storage', as
     await stop(); await start();
     state = await (await request('/state')).json();
     assert.equal(state.standings.find(t => t.name === '3-3').point, 30);
+    // Persist the exact click order, including edits with unchanged numeric totals.
+    const manualTeam = state.standings.find(t => t.name === '3-1');
+    const sequence = ['승', '패', '패', '승', '승', '패', '승'];
+    const orderedUpdate = { ...manualTeam, total: manualTeam.total + sequence.length,
+      remaining: Math.max(0, manualTeam.remaining - sequence.length),
+      win: manualTeam.win + 4, lose: manualTeam.lose + 3, expected: manualTeam,
+      resultChanges: sequence.map(result => ({ result, delta: 1 })) };
+    const unchangedTeam = state.standings.find(t => t.name === '3-2');
+    assert.equal((await request('/standings', 'PUT', { teams: [orderedUpdate,
+      { ...unchangedTeam, expected: unchangedTeam, resultChanges: [{ result: '승', delta: 1 }] }] })).status, 400);
+    state = await (await request('/state')).json();
+    assert.deepEqual(state.standings.find(t => t.name === '3-1'), manualTeam);
+    assert.equal((await request('/standings', 'PUT', { teams: [orderedUpdate] })).status, 200);
+    state = await (await request('/state')).json();
+    let ordered = state.standings.find(t => t.name === '3-1');
+    assert.deepEqual(ordered.recent, sequence.slice(-5));
+    const reorder = { ...ordered, expected: ordered, resultChanges: [{ result: '패', delta: -1 }, { result: '패', delta: 1 }] };
+    assert.equal((await request('/standings', 'PUT', { teams: [reorder] })).status, 200);
+    // The numeric totals match, but the history version changed.
+    assert.equal((await request('/standings', 'PUT', { teams: [reorder] })).status, 409);
+    await stop(); await start();
+    state = await (await request('/state')).json();
+    ordered = state.standings.find(t => t.name === '3-1');
+    assert.deepEqual(ordered.recent, ['패', '승', '승', '승', '패']);
+    assert.equal(ordered.win, orderedUpdate.win);
+    const realMatch = await (await request('/matches', 'POST', { ...schedule, time: '16:20', home: '3-1', away: '3-2' })).json();
+    assert.equal((await request(`/matches/${realMatch.id}/result`, 'PUT', { homeSets: 2, awaySets: 1 })).status, 200);
+    state = await (await request('/state')).json();
+    assert.deepEqual(state.standings.find(t => t.name === '3-1').recent, ['승', '승', '승', '패', '승']);
+    assert.equal((await request(`/matches/${realMatch.id}/result`, 'PUT', { homeSets: 0, awaySets: 2 })).status, 200);
+    state = await (await request('/state')).json();
+    assert.deepEqual(state.standings.find(t => t.name === '3-1').recent, ['승', '승', '승', '패', '패']);
+    // Set corrections are independent of match wins/losses and never create recent results.
+    const beforeSets = state.standings.find(t => t.name === '3-1');
+    const setUpdate = { ...beforeSets, winScore: beforeSets.winScore + 1, loseScore: beforeSets.loseScore + 1, expected: beforeSets, resultChanges: [] };
+    assert.equal((await request('/standings', 'PUT', { teams: [{ ...setUpdate, winScore: -1 }] })).status, 400);
+    assert.equal((await request('/standings/3-1', 'PUT', { ...setUpdate, loseScore: 1.5 })).status, 400);
+    assert.equal((await request('/standings', 'PUT', { teams: [setUpdate] }, false)).status, 401);
+    assert.equal((await request('/standings', 'PUT', { teams: [setUpdate] })).status, 200);
+    await stop(); await start();
+    state = await (await request('/state')).json();
+    const afterSets = state.standings.find(t => t.name === '3-1');
+    assert.equal(afterSets.point, (beforeSets.winScore + 1) * 3);
+    assert.equal(afterSets.loseScore, beforeSets.loseScore + 1);
+    assert.equal(afterSets.win, beforeSets.win);
+    assert.equal(afterSets.lose, beforeSets.lose);
+    assert.deepEqual(afterSets.recent, beforeSets.recent);
+    assert.equal((await request('/standings', 'PUT', { teams: [setUpdate] })).status, 409);
+    const nextSetMatch = await (await request('/matches', 'POST', { ...schedule, time: '16:30', home: '3-1', away: '3-2' })).json();
+    assert.equal((await request(`/matches/${nextSetMatch.id}/result`, 'PUT', { homeSets: 2, awaySets: 0 })).status, 200);
+    state = await (await request('/state')).json();
+    assert.equal(state.standings.find(t => t.name === '3-1').winScore, afterSets.winScore + 2);
+    assert.equal(state.standings.find(t => t.name === '3-1').point, afterSets.point + 6);
     await request('/logout', 'POST');
     assert.equal((await request('/matches','POST',schedule)).status, 401);
   } finally {

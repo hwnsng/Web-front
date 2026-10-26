@@ -1,0 +1,38 @@
+import { test, expect } from '@playwright/test';
+
+test('set scores are editable only in admin edit mode and a lost match can earn points', async ({ page }) => {
+  await page.goto('/loginPage');
+  await page.getByLabel('아이디').fill('admin');
+  await page.getByLabel('비밀번호', { exact: true }).fill('browser-test-password');
+  await page.getByRole('button', { name: '로그인', exact: true }).click();
+  await page.goto('/rankPage');
+  await expect(page.getByRole('columnheader', { name: '세트 승리', exact: true })).toHaveCount(0);
+  const row = page.getByRole('row').filter({ has: page.getByRole('rowheader', { name: '2-4', exact: true }) });
+  await page.getByRole('button', { name: '수정', exact: true }).click();
+  await expect(page.getByRole('columnheader', { name: '세트 승리', exact: true })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: '세트 패배', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '2-4 경기 수 증가', exact: true }).click();
+  await page.getByRole('button', { name: '2-4 패배 증가', exact: true }).click();
+  await page.getByRole('button', { name: '2-4 세트 승리 증가', exact: true }).click();
+  await expect(row.locator('.standings-points')).toHaveText('3');
+  await page.getByRole('button', { name: '취소', exact: true }).click();
+  await expect(row.locator('.standings-points')).toHaveText('0');
+  await page.getByRole('button', { name: '수정', exact: true }).click();
+  await page.getByRole('button', { name: '2-4 경기 수 증가', exact: true }).click();
+  await page.getByRole('button', { name: '2-4 패배 증가', exact: true }).click();
+  await page.getByRole('button', { name: '2-4 세트 승리 증가', exact: true }).click();
+  await page.getByRole('button', { name: '저장', exact: true }).click();
+  await expect(page.getByRole('columnheader', { name: '세트 승리', exact: true })).toHaveCount(0);
+  await expect(row.locator('.standings-points')).toHaveText('3');
+  await page.reload();
+  await expect(row.locator('.standings-points')).toHaveText('3');
+  const state = await (await page.request.get('/api/state')).json();
+  const team = state.standings.find((entry: { name: string }) => entry.name === '2-4');
+  expect([team.win, team.lose, team.winScore, team.loseScore, team.point]).toEqual([0, 1, 1, 2, 3]);
+  expect(team.recent).toEqual(['패']);
+  await page.getByRole('button', { name: '수정', exact: true }).click();
+  await page.getByRole('button', { name: '2-4 세트 패배 증가', exact: true }).click();
+  await expect(row.locator('.standings-points')).toHaveText('3');
+  await page.getByRole('button', { name: '저장', exact: true }).click();
+  await expect(page.getByRole('columnheader', { name: '세트 패배', exact: true })).toHaveCount(0);
+});

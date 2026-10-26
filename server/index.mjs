@@ -5,6 +5,7 @@ import { mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { teams, matchesPerTeam, standings, validResult, koreaDate } from './league.mjs';
+import { matchHistory, applyResultChanges, resultChanges } from './history.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataDir = process.env.DATA_DIR || path.join(root, 'data');
@@ -13,6 +14,7 @@ const db = new DatabaseSync(path.join(dataDir, 'league.sqlite'));
 db.exec(`PRAGMA journal_mode=WAL;
   CREATE TABLE IF NOT EXISTS admin (username TEXT PRIMARY KEY, salt TEXT NOT NULL, hash TEXT NOT NULL);
   CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, expires INTEGER NOT NULL);
+  CREATE TABLE IF NOT EXISTS standing_history (name TEXT PRIMARY KEY, entries TEXT NOT NULL, revision INTEGER NOT NULL);
   CREATE TABLE IF NOT EXISTS standing_adjustments (
     name TEXT PRIMARY KEY, total INTEGER NOT NULL, remaining INTEGER NOT NULL,
     win INTEGER NOT NULL, lose INTEGER NOT NULL);
@@ -20,6 +22,11 @@ db.exec(`PRAGMA journal_mode=WAL;
     id INTEGER PRIMARY KEY, date TEXT NOT NULL, time TEXT NOT NULL, home TEXT NOT NULL, away TEXT NOT NULL,
     homeSets INTEGER, awaySets INTEGER, UNIQUE(date,time,home,away));
 `);
+for (const column of ['winSets', 'loseSets']) {
+  if (!db.prepare('PRAGMA table_info(standing_adjustments)').all().some(field => field.name === column)) {
+    db.exec(`ALTER TABLE standing_adjustments ADD COLUMN ${column} INTEGER NOT NULL DEFAULT 0`);
+  }
+}
 if (!db.prepare('SELECT 1 FROM admin LIMIT 1').get()) {
   const password = process.env.ADMIN_PASSWORD;
   if (!password || password.length < 10) throw new Error('최초 실행 시 ADMIN_PASSWORD를 10자 이상으로 설정하세요.');
@@ -27,6 +34,32 @@ if (!db.prepare('SELECT 1 FROM admin LIMIT 1').get()) {
   db.prepare('INSERT INTO admin VALUES (?,?,?)').run(process.env.ADMIN_USERNAME || 'admin', salt, scryptSync(password, salt, 64).toString('hex'));
 }
 const app = express();
+function readHistory(name, matches) {
+  const saved = db.prepare('SELECT entries FROM standing_history WHERE name=?').get(name);
+  return saved ? JSON.parse(saved.entries) : matchHistory(matches, name);
+}
+function saveHistory(name, history) {
+  db.prepare(`INSERT INTO standing_history(name,entries,revision) VALUES (?,?,1)
+    ON CONFLICT(name) DO UPDATE SET entries=excluded.entries,revision=standing_history.revision+1`).run(name, JSON.stringify(history));
+}
+function currentStandings(matches) {
+  return standings(matches, db.prepare('SELECT * FROM standing_adjustments').all(), db.prepare('SELECT * FROM standing_history').all());
+}
+const standingFields = ['total', 'remaining', 'win', 'lose'];
+function invalidSetScores(update) {
+  return ['winScore', 'loseScore'].some(field => update[field] !== undefined &&
+    (!Number.isSafeInteger(update[field]) || update[field] < 0 || update[field] > 1000000));
+}
+function saveAdjustment(update, raw, current) {
+  const winScore = update.winScore ?? Math.max(0, current.winScore + (update.win - current.win) * 2);
+  const loseScore = update.loseScore ?? Math.max(0, current.loseScore + (update.lose - current.lose) * 2);
+  db.prepare(`INSERT INTO standing_adjustments(name,total,remaining,win,lose,winSets,loseSets) VALUES (?,?,?,?,?,?,?)
+    ON CONFLICT(name) DO UPDATE SET total=excluded.total,remaining=excluded.remaining,win=excluded.win,lose=excluded.lose,
+      winSets=excluded.winSets,loseSets=excluded.loseSets`).run(update.name,
+    ...standingFields.map(field => update[field] - raw[field]),
+    winScore - raw.winScore - (update.win - raw.win) * 2,
+    loseScore - raw.loseScore - (update.lose - raw.lose) * 2);
+}
 app.disable('x-powered-by');
 app.use(express.json({ limit: '8kb' }));
 app.use('/api', (req, res, next) => {
@@ -72,15 +105,14 @@ app.post('/api/logout', (req, res) => {
 });
 app.get('/api/state', (req, res) => {
   const matches = db.prepare('SELECT * FROM matches ORDER BY date,time,id').all();
-  const adjustments = db.prepare('SELECT * FROM standing_adjustments').all();
-  res.json({ admin: !!session(req), today: koreaDate(), teams, matches, standings: standings(matches, adjustments) });
+  res.json({ admin: !!session(req), today: koreaDate(), teams, matches, standings: currentStandings(matches) });
 });
 app.put('/api/standings', adminOnly, (req, res) => {
   const updates = req.body?.teams;
   const fields = ['total', 'remaining', 'win', 'lose'];
   if (!Array.isArray(updates) || updates.length < 1 || updates.length > teams.length ||
       new Set(updates.map(team => team?.name)).size !== updates.length ||
-      updates.some(team => !team || !teams.includes(team.name) || !team.expected ||
+      updates.some(team => !team || !teams.includes(team.name) || !team.expected || invalidSetScores(team) ||
         fields.some(field => !Number.isSafeInteger(team[field]) || team[field] < 0 || team[field] > 1000000))) {
     return res.status(400).json({ error: '팀별 경기 기록을 확인해주세요.' });
   }
@@ -90,20 +122,22 @@ app.put('/api/standings', adminOnly, (req, res) => {
   db.exec('BEGIN IMMEDIATE');
   try {
     const matches = db.prepare('SELECT * FROM matches').all();
-    const current = standings(matches, db.prepare('SELECT * FROM standing_adjustments').all());
+    const current = currentStandings(matches);
     const original = standings(matches);
     for (const update of updates) {
       const team = current.find(row => row.name === update.name);
-      if ([...fields, 'point'].some(field => update.expected[field] !== team[field])) {
+      if ([...fields, 'point'].some(field => update.expected[field] !== team[field]) ||
+          ['winScore', 'loseScore'].some(field => update.expected[field] !== undefined && update.expected[field] !== team[field]) ||
+          (update.expected.historyVersion !== undefined && update.expected.historyVersion !== team.historyVersion)) {
         db.exec('ROLLBACK');
         return res.status(409).json({ error: `${update.name} 팀의 기록이 편집 중 변경되었습니다. 취소 후 다시 수정해주세요.` });
       }
     }
-    const save = db.prepare(`INSERT INTO standing_adjustments(name,total,remaining,win,lose) VALUES (?,?,?,?,?)
-      ON CONFLICT(name) DO UPDATE SET total=excluded.total,remaining=excluded.remaining,win=excluded.win,lose=excluded.lose`);
     for (const update of updates) {
       const team = original.find(row => row.name === update.name);
-      save.run(update.name, ...fields.map(field => update[field] - team[field]));
+      const changes = resultChanges(update, current.find(row => row.name === update.name));
+      if (changes.length) saveHistory(update.name, applyResultChanges(readHistory(update.name, matches), changes));
+      saveAdjustment(update, team, current.find(row => row.name === update.name));
     }
     db.exec('COMMIT');
     res.json({ ok: true });
@@ -113,21 +147,27 @@ app.put('/api/standings/:name', adminOnly, (req, res) => {
   const name = req.params.name;
   if (!teams.includes(name)) return res.status(404).json({ error: '팀을 찾을 수 없습니다.' });
   const fields = ['total', 'remaining', 'win', 'lose'];
-  if (!req.body || fields.some(field => !Number.isSafeInteger(req.body[field]) || req.body[field] < 0 || req.body[field] > 1000000)) {
+  if (!req.body || invalidSetScores(req.body) || fields.some(field => !Number.isSafeInteger(req.body[field]) || req.body[field] < 0 || req.body[field] > 1000000)) {
     return res.status(400).json({ error: '각 항목에 0 이상 1,000,000 이하의 정수를 입력하세요.' });
   }
   if (req.body.win + req.body.lose > req.body.total) {
     return res.status(400).json({ error: '승리와 패배의 합은 경기 수를 넘을 수 없습니다.' });
   }
   const matches = db.prepare('SELECT * FROM matches').all();
-  const current = standings(matches, db.prepare('SELECT * FROM standing_adjustments').all()).find(team => team.name === name);
-  if (req.body.expected && fields.some(field => req.body.expected[field] !== current[field])) {
+  const current = currentStandings(matches).find(team => team.name === name);
+  if (req.body.expected && (fields.some(field => req.body.expected[field] !== current[field]) ||
+      ['winScore', 'loseScore'].some(field => req.body.expected[field] !== undefined && req.body.expected[field] !== current[field]) ||
+      (req.body.expected.historyVersion !== undefined && req.body.expected.historyVersion !== current.historyVersion))) {
     return res.status(409).json({ error: '편집 중 경기 기록이 변경되었습니다. 창을 닫고 다시 수정해주세요.' });
   }
   const original = standings(matches).find(team => team.name === name);
-  db.prepare(`INSERT INTO standing_adjustments(name,total,remaining,win,lose) VALUES (?,?,?,?,?)
-    ON CONFLICT(name) DO UPDATE SET total=excluded.total,remaining=excluded.remaining,win=excluded.win,lose=excluded.lose`)
-    .run(name, ...fields.map(field => req.body[field] - original[field]));
+  const changes = resultChanges(req.body, current);
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    saveAdjustment({ ...req.body, name }, original, current);
+    if (changes.length) saveHistory(name, applyResultChanges(readHistory(name, matches), changes));
+    db.exec('COMMIT');
+  } catch (error) { db.exec('ROLLBACK'); throw error; }
   res.json({ ok: true });
 });
 app.post('/api/matches', adminOnly, (req, res) => {
@@ -172,7 +212,19 @@ app.put('/api/matches/:id/result', adminOnly, (req, res) => {
   if (projected.some(team => [match.home, match.away].includes(team.name) && team.win + team.lose > team.total)) {
     return res.status(409).json({ error: '수동 보정된 승리·패배의 합이 경기 수를 초과합니다. 순위표 기록을 먼저 조정해주세요.' });
   }
-  db.prepare('UPDATE matches SET homeSets=?,awaySets=? WHERE id=?').run(homeSets, awaySets, match.id);
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    const matches = db.prepare('SELECT * FROM matches').all();
+    for (const [name, result] of [[match.home, homeSets > awaySets ? '승' : '패'], [match.away, awaySets > homeSets ? '승' : '패']]) {
+      const history = readHistory(name, matches);
+      const previous = history.find(entry => entry.matchId === match.id);
+      if (previous) previous.result = result;
+      else if (match.homeSets === null) history.push({ matchId: match.id, result, count: 1 });
+      saveHistory(name, history);
+    }
+    db.prepare('UPDATE matches SET homeSets=?,awaySets=? WHERE id=?').run(homeSets, awaySets, match.id);
+    db.exec('COMMIT');
+  } catch (error) { db.exec('ROLLBACK'); throw error; }
   res.json({ ok: true });
 });
 app.delete('/api/matches/:id', adminOnly, (req, res) => {

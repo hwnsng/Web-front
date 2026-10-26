@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { api, useLeague, type Match } from '../league';
+import MatchResultDialog from './MatchResultDialog';
 export default function MatchCard({ match }: { match: Match }) {
   const { data, refresh } = useLeague();
   const [editing, setEditing] = useState(false);
+  const [viewingResult, setViewingResult] = useState(false);
   const [score, setScore] = useState(`${match.homeSets ?? 2}:${match.awaySets ?? 0}`);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -24,18 +26,21 @@ export default function MatchCard({ match }: { match: Match }) {
     finally { setBusy(false); }
   }
   return <article className="sports-card">
-    <h2>{match.home} <span className="vs">{completed ? `${match.homeSets} : ${match.awaySets}` : 'VS'}</span> {match.away}</h2>
-    {completed && <p>{(match.homeSets ?? 0) > (match.awaySets ?? 0) ? match.home : match.away} 승리 · 세트 득실차 {Math.abs((match.homeSets ?? 0) - (match.awaySets ?? 0))}</p>}
+    <div className="match-card-heading">
+      <h2>{match.home} <span className="vs">VS</span> {match.away}</h2>
+      {completed && <button type="button" className="secondary match-result-trigger" aria-haspopup="dialog" onClick={() => setViewingResult(true)}>결과 보기</button>}
+    </div>
     <div className="team-comparison">{[match.home, match.away].map(name => {
       const team = data?.standings.find(t => t.name === name);
       return team && <div key={name} className="team-form">
-        <div className="team-form-heading"><strong>{name}</strong><span>{team.rank}위</span></div>
-        <p>{team.win}승 {team.lose}패 · 승점 <b>{team.point}</b></p>
-        <div className="recent-form-label">최근 5경기 <span>최신순</span></div>
-        <div className="recent-form" aria-label={`${name} 최근 경기, 왼쪽부터 최신순`}>
+        <div className="team-form-heading"><span>{team.rank}위</span><strong>{name}</strong></div>
+        <div className="team-points" aria-label={`승점 ${team.point}`}><span>승점</span><strong>{team.point}</strong></div>
+        <p className="team-record">{team.win}승 {team.lose}패</p>
+        <div className="recent-form-label">최근 5경기</div>
+        <div className="recent-form" aria-label={`${name} 최근 경기, 오른쪽이 최신`}>
           {Array.from({ length: 5 }, (_, index) => {
-            const result = team.recent[index];
-            return <span key={index} className={`form-result ${result === '승' ? 'form-win' : result === '패' ? 'form-loss' : 'form-empty'}`} aria-label={`${index + 1}번째 최근 경기: ${result || '기록 없음'}`} title={result || '기록 없음'}>{result || '–'}</span>;
+            const result = team.recent.slice(-5)[index - Math.max(0, 5 - team.recent.length)];
+            return <span key={index} className={`form-result ${result === '승' ? 'form-win' : result === '패' ? 'form-loss' : 'form-empty'}`} aria-label={`${index + 1}번째 경기: ${result || '기록 없음'}`} title={result || '기록 없음'}>{result || '–'}</span>;
           })}
         </div>
       </div>;
@@ -55,5 +60,6 @@ export default function MatchCard({ match }: { match: Match }) {
       </form>}
     </div>}
     {error && <p role="alert" className="form-error">{error}</p>}
+    {completed && viewingResult && <MatchResultDialog match={match} onClose={() => setViewingResult(false)} />}
   </article>;
 }
