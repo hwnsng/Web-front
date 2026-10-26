@@ -35,8 +35,8 @@ export function standings(matches, adjustments = [], histories = []) {
     row.point = row.winScore * 3;
     row.difference = row.winScore - row.loseScore;
   }
-  rows.sort((a, b) => b.point - a.point || a.name.localeCompare(b.name));
-  return rows.map(row => ({ ...row, rank: rows.findIndex(t => t.point === row.point) + 1 }));
+  rows.sort((a, b) => b.point - a.point || a.total - b.total || a.name.localeCompare(b.name));
+  return rows.map(row => ({ ...row, rank: rows.findIndex(t => t.point === row.point && t.total === row.total) + 1 }));
 }
 export function validResult(a, b) {
   return Number.isInteger(a) && Number.isInteger(b) && ((a === 2 && [0, 1].includes(b)) || (b === 2 && [0, 1].includes(a)));

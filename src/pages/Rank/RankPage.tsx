@@ -95,7 +95,7 @@ export default function RankPage() {
           <thead><tr>{['순위', '팀', '경기 수', '승리', '패배', ...(editing ? ['세트 승리', '세트 패배'] : []), '승점', '연속'].map(title => <th scope="col" key={title} className={title === '승점' ? 'standings-points' : ''}>{title}</th>)}</tr></thead>
           <tbody>{rows.map(team => <tr key={team.name} className={team.rank <= 3 && team.total > 0 ? 'standings-top-team' : ''}>
             <td className="standings-position"><span className={`position-number${team.rank <= 3 && team.total > 0 ? ` podium-position podium-${team.rank}` : ''}`}>{String(team.rank).padStart(2, '0')}</span>
-              {team.total > 0 && rows.some(other => other.name !== team.name && other.point === team.point) && <span className="shared-rank-label">공동</span>}
+              {team.total > 0 && rows.some(other => other.name !== team.name && other.point === team.point && other.total === team.total) && <span className="shared-rank-label">공동</span>}
             </td>
             <th scope="row" className="standings-team">{team.name}</th>
             <td className="standings-played">{numberCell(team, 'total')}</td>
