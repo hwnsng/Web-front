@@ -34,10 +34,14 @@ test('2026 sample excludes holidays, exams and exam preparation week with balanc
   assert.equal(rows.find(team => team.name === '3-2').point, 30);
   assert.equal(rows.find(team => team.name === '2-1').point, 27);
   assert.equal(rows.find(team => team.name === '3-1').rank, 3);
-  assert.equal(rows.find(team => team.name === '1-2').rank, 5);
+  assert.equal(rows.find(team => team.name === '1-2').rank, 6);
   assert.equal(rows.find(team => team.name === '3-3').rank, 7);
   assert.equal(new Set(rows.map(team => team.point)).size, 9);
   assert.ok(rows.every(team => rows.filter(other => other.point === team.point).length <= 2));
+  const shared = rows.filter(team => rows.some(other => other.name !== team.name && other.rank === team.rank));
+  assert.equal(shared.length, 2);
+  assert.ok(shared.every(team => team.rank === 7));
+  assert.deepEqual(shared.map(team => team.name).sort(), ['1-4', '3-3']);
   for (const order of [['1-2', '1-4', '1-1', '1-3'], ['3-2', '3-1', '3-3', '3-4'], ['2-1', '2-3', '2-2', '2-4']]) {
     const positions = order.map(name => rows.find(team => team.name === name).rank);
     assert.ok(positions.slice(1).every((rank, index) => rank >= positions[index]));

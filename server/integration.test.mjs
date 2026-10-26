@@ -13,7 +13,7 @@ test('best of three validation and shared ranks', () => {
   assert.ok(standings([]).every(t => t.rank === 1 && t.total === 0 && t.remaining === 11));
 });
 
-test('rank depends only on points and skips positions after a tie even when set differences differ', () => {
+test('equal points and games share ranks regardless of set difference and skip the next position', () => {
   const points = [30, 27, 24, 21, 18, 18, 15, 12, 9, 6, 3, 0];
   const rows = standings([], teams.map((name, index) => ({ name, total: 1, remaining: 10, win: 0, lose: 1, winSets: points[index] / 3, loseSets: index })));
   const first = rows.find(team => team.name === '2-1');
@@ -21,6 +21,15 @@ test('rank depends only on points and skips positions after a tie even when set 
   assert.notEqual(first.difference, second.difference);
   assert.equal(first.rank, 5);
   assert.equal(second.rank, 5);
+  assert.equal(rows.find(team => team.name === '2-3').rank, 7);
+});
+
+test('fewer played games breaks a point tie before checking shared ranks', () => {
+  const points = [30, 27, 24, 21, 18, 18, 15, 12, 9, 6, 3, 0];
+  const rows = standings([], teams.map((name, index) => ({ name, total: index === 4 ? 2 : 1, remaining: 10,
+    win: 0, lose: 1, winSets: points[index] / 3, loseSets: index })));
+  assert.equal(rows.find(team => team.name === '2-2').rank, 5);
+  assert.equal(rows.find(team => team.name === '2-1').rank, 6);
   assert.equal(rows.find(team => team.name === '2-3').rank, 7);
 });
 
