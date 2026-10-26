@@ -2,14 +2,14 @@
 .standings-edit-actions { display: flex; gap: 8px; }
 .sports-page .standings-edit-actions button { font-size: 13px; padding: 9px 18px; }
 .standings-edit-help { margin: 0; padding: 14px 24px; font-size: 13px; background: #f5f6f7; color: #626873; }
-.standings-table.is-editing { min-width: 850px; }
+.standings-table.is-editing { min-width: 1120px; }
 .standing-stepper { display: inline-flex; align-items: center; gap: 8px; }
 .standing-stepper > span { min-width: 22px; color: #202226; font-variant-numeric: tabular-nums; }
 .sports-page .standing-stepper button { display: inline-flex; justify-content: center; align-items: center; width: 30px; height: 32px; padding: 0; background: #e9ebee; color: #202226; border: 1px solid #d9dde2; border-radius: 7px; font-size: 19px; }
 .sports-page .standing-stepper button:hover:not(:disabled) { background: #d9dde2; }
 .sports-page .standing-stepper button:disabled { opacity: .35; }
 .standings-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin: 0 0 28px; }
-.standings-page .standings-eyebrow { color: #777b82; font-size: 11px; letter-spacing: .18em; font-weight: 700; margin: 0 0 8px; }
+.standings-page .standings-eyebrow { color: var(--club-accent); font-size: 11px; letter-spacing: .18em; font-weight: 700; margin: 0 0 8px; }
 .standings-heading h1 { margin: 0; font-weight: 800; letter-spacing: -.04em; }
 .standings-live { display: inline-flex; align-items: center; gap: 7px; color: #666b73; font-size: 12px; white-space: nowrap; padding-bottom: 5px; }
 .standings-live > span { width: 6px; height: 6px; border-radius: 50%; background: #34373c; }
@@ -28,7 +28,7 @@
 .standings-table tbody td, .standings-table tbody th { height: 70px; padding: 13px 12px; border-bottom: 1px solid #eceef0; background: #fff; font-size: 15px; transition: background .15s; }
 .standings-table tbody tr:nth-child(even) > * { background: #fafbfc; }
 .standings-table tbody tr:last-child > * { border-bottom: 0; }
-.standings-table tbody tr:hover > * { background: #f0f1f3; }
+.standings-table tbody tr:hover > * { background: #f1f7f4; }
 .position-number { display: inline-flex; width: 33px; height: 33px; align-items: center; justify-content: center; font-size: 17px; font-weight: 750; color: #858a93; letter-spacing: -.04em; }
 .position-number.podium-position { border-radius: 8px; }
 .position-number.podium-1 { background: #f9e6a7; color: #795600; }
@@ -37,9 +37,12 @@
 .standings-table .standings-team { text-align: center; font-size: 22px; font-weight: 750; }
 .standings-table .standings-secondary { color: #777d86; }
 .standings-table .standings-wins, .standings-table .standings-difference { font-weight: 650; }
-.standings-table thead .standings-points { background: #e9ebee; color: #18191c; font-weight: 800; }
-.standings-table tbody .standings-points { background: #f0f1f3; border-left: 1px solid #e7e9ec; border-right: 1px solid #e7e9ec; min-width: 75px; }
-.standings-points strong { font-size: 20px; font-weight: 800; letter-spacing: -.04em; color: #16181c; }
+.standings-table .standings-streak { font-weight: 700; }
+.standings-table .streak-win { color: #1e4f9a; }
+.standings-table .streak-loss { color: #a63737; }
+.standings-table thead .standings-points { background: #deeee5; color: var(--club-accent-hover); font-weight: 800; }
+.standings-table tbody .standings-points { background: var(--club-soft); border-left: 1px solid var(--club-border); border-right: 1px solid var(--club-border); min-width: 75px; }
+.standings-points strong { font-size: 20px; font-weight: 800; letter-spacing: -.04em; color: var(--club-accent); }
 .standings-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 17px 26px; background: #fafbfc; border-top: 1px solid #e8eaed; color: #777d86; font-size: 12px; }
 .standings-scroll-hint { display: none; }
 .standings-loading { padding: 32px; text-align: center; color: #777d86; }

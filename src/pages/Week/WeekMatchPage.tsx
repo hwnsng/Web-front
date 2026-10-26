@@ -18,7 +18,7 @@ export default function WeekMatchPage() {
   const monthStart = new Date(Date.UTC(sunday.getUTCFullYear(), sunday.getUTCMonth(), 1));
   const weekNumber = Math.ceil((sunday.getUTCDate() + monthStart.getUTCDay()) / 7);
   return <main className="sports-page weekly-page">
-    <h1><span>스포츠 클럽</span> 경기 일정</h1>
+    <div className="page-heading"><p className="page-eyebrow">MATCH SCHEDULE</p><h1><span>스포츠 클럽</span> 경기 일정</h1></div>
     <div className="weekly-heading">
       <div><h2>이번 주 · {sunday.getUTCMonth() + 1}월 {weekNumber}주차</h2>
         <p>{sunday.getUTCFullYear()}년 {sunday.getUTCMonth() + 1}/{sunday.getUTCDate()} (일) ~ {saturday.getUTCMonth() + 1}/{saturday.getUTCDate()} (토)</p>
