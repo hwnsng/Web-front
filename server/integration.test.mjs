@@ -13,6 +13,17 @@ test('best of three validation and shared ranks', () => {
   assert.ok(standings([]).every(t => t.rank === 1 && t.total === 0 && t.remaining === 11));
 });
 
+test('rank depends only on points and skips positions after a tie even when set differences differ', () => {
+  const points = [30, 27, 24, 21, 18, 18, 15, 12, 9, 6, 3, 0];
+  const rows = standings([], teams.map((name, index) => ({ name, total: 1, remaining: 10, win: 0, lose: 1, winSets: points[index] / 3, loseSets: index })));
+  const first = rows.find(team => team.name === '2-1');
+  const second = rows.find(team => team.name === '2-2');
+  assert.notEqual(first.difference, second.difference);
+  assert.equal(first.rank, 5);
+  assert.equal(second.rank, 5);
+  assert.equal(rows.find(team => team.name === '2-3').rank, 7);
+});
+
 test('all teams finish with 11 played and zero remaining; schedules do not affect totals', () => {
   const matches = [];
   for (let i = 0; i < teams.length; i++) {
@@ -33,7 +44,7 @@ test('authentication, schedule, results, corrections and persistent storage', as
   const password = 'integration-test-password';
   let child;
   async function start() {
-    child = spawn(process.execPath, ['server/index.mjs'], { env: { ...process.env, PORT: String(port), DATA_DIR: directory, ADMIN_PASSWORD: password }, stdio: ['ignore','pipe','pipe'] });
+    child = spawn(process.execPath, ['server/index.mjs'], { env: { ...process.env, PORT: String(port), DATA_DIR: directory, ADMIN_PASSWORD: password, SEED_2026_SAMPLE: 'false' }, stdio: ['ignore','pipe','pipe'] });
     await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => reject(new Error('Server startup timeout')), 10000);
       child.stdout.on('data', chunk => { if (chunk.toString().includes('ready')) { clearTimeout(timeout); resolve(); } });
@@ -53,6 +64,12 @@ test('authentication, schedule, results, corrections and persistent storage', as
     let state = await (await request('/state')).json();
     assert.equal(state.admin, false);
     assert.equal(state.matches.length, 0);
+    assert.equal(state.activeSeason, 2026);
+    const archive2025 = state.seasons.find(season => season.year === 2025);
+    assert.equal(archive2025.estimated, true);
+    assert.equal(archive2025.standings[0].name, '3-3');
+    assert.equal(archive2025.standings[1].name, '2-1');
+    assert.ok(state.seasons.find(season => season.year === 2026).standings.every(team => team.total === 0));
     const schedule = { date: state.today, time: '12:40', home: '1-1', away: '1-2' };
     assert.equal((await request('/matches','POST', schedule)).status, 401);
     assert.equal((await request('/login','POST',{ username:'admin', password:'wrong' })).status, 401);
@@ -60,6 +77,7 @@ test('authentication, schedule, results, corrections and persistent storage', as
     assert.equal(login.status, 200);
     assert.match(login.headers.get('set-cookie'), /HttpOnly/);
     cookie = login.headers.get('set-cookie').split(';')[0];
+    assert.equal((await request('/standings', 'PUT', { season: 2025, teams: [] })).status, 400);
     assert.equal((await request('/matches','POST',{ ...schedule, date: '2026-02-30' })).status, 400);
     assert.equal((await request('/matches','POST',{ ...schedule, away: '1-1' })).status, 400);
     const created = await request('/matches','POST',schedule);
@@ -205,6 +223,8 @@ test('authentication, schedule, results, corrections and persistent storage', as
     state = await (await request('/state')).json();
     assert.equal(state.standings.find(t => t.name === '3-1').winScore, afterSets.winScore + 2);
     assert.equal(state.standings.find(t => t.name === '3-1').point, afterSets.point + 6);
+    assert.deepEqual(state.seasons.find(season => season.year === 2025), archive2025);
+    assert.deepEqual(state.seasons.find(season => season.year === 2026).standings, state.standings);
     await request('/logout', 'POST');
     assert.equal((await request('/matches','POST',schedule)).status, 401);
   } finally {

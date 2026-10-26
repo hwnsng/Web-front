@@ -1,7 +1,8 @@
 import { createContext, useContext } from 'react';
 export interface Match { id: number; date: string; time: string; home: string; away: string; homeSets: number | null; awaySets: number | null }
 export interface Team { name: string; rank: number; total: number; remaining: number; win: number; lose: number; point: number; winScore: number; loseScore: number; difference: number; recent: string[]; historyVersion?: number; streak?: { result: string | null; count: number } }
-export interface State { admin: boolean; today: string; teams: string[]; matches: Match[]; standings: Team[] }
+export interface Season { year: number; estimated: boolean; standings: Team[] }
+export interface State { admin: boolean; today: string; teams: string[]; matches: Match[]; standings: Team[]; activeSeason?: number; seasons?: Season[] }
 export const LeagueContext = createContext<{ data: State | null; error: string; refresh: () => Promise<void> }>({ data: null, error: '', refresh: async () => {} });
 export const useLeague = () => useContext(LeagueContext);
 export async function api(url: string, method = 'GET', body?: unknown) {

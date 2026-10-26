@@ -12,10 +12,15 @@ export default function RankPage() {
   const [baseline, setBaseline] = useState<Team[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const editing = !!data?.admin && draft !== null;
-  const rows = editing ? draft : data?.standings ?? [];
+  const [selectedYear, setSelectedYear] = useState(2026);
+  const activeYear = data?.activeSeason ?? 2026;
+  const seasons = data?.seasons ?? [{ year: activeYear, estimated: false, standings: data?.standings ?? [] }];
+  const selectedSeason = seasons.find(season => season.year === selectedYear);
+  const isCurrent = selectedYear === activeYear;
+  const editing = !!data?.admin && draft !== null && isCurrent;
+  const rows = editing ? draft : isCurrent ? data?.standings ?? [] : selectedSeason?.standings ?? [];
   function startEditing() {
-    if (!data) return;
+    if (!data || !isCurrent) return;
     setBaseline(data.standings.map(team => ({ ...team })));
     setDraft(data.standings.map(team => ({ ...team, resultChanges: [], setWinOffset: 0, setLoseOffset: 0 })));
     setError('');
@@ -50,7 +55,7 @@ export default function RankPage() {
     if (!changed.length) { setDraft(null); return; }
     setBusy(true); setError('');
     try {
-      await api('/standings', 'PUT', { teams: changed.map(team => ({ name: team.name, total: team.total, remaining: team.remaining, win: team.win, lose: team.lose, winScore: team.winScore, loseScore: team.loseScore, resultChanges: team.resultChanges, expected: baseline.find(row => row.name === team.name) })) });
+      await api('/standings', 'PUT', { season: activeYear, teams: changed.map(team => ({ name: team.name, total: team.total, remaining: team.remaining, win: team.win, lose: team.lose, winScore: team.winScore, loseScore: team.loseScore, resultChanges: team.resultChanges, expected: baseline.find(row => row.name === team.name) })) });
       await refresh(); setDraft(null);
     } catch (e) { setError((e as Error).message); }
     finally { setBusy(false); }
@@ -65,8 +70,21 @@ export default function RankPage() {
   }
   return <main className="sports-page standings-page">
     <div className="standings-heading"><div><p className="standings-eyebrow">LEAGUE STANDINGS</p><h1>리그 순위</h1></div></div>
+    <div className="season-tabs" role="tablist" aria-label="리그 시즌">
+      {seasons.map((season, index) => <button key={season.year} id={`season-tab-${season.year}`} type="button" role="tab"
+        aria-selected={selectedYear === season.year} aria-controls="season-standings" tabIndex={selectedYear === season.year ? 0 : -1}
+        disabled={editing || busy} onClick={() => { setSelectedYear(season.year); setError(''); }}
+        onKeyDown={event => {
+          if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+          event.preventDefault();
+          const next = event.key === 'Home' ? 0 : event.key === 'End' ? seasons.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + seasons.length) % seasons.length;
+          setSelectedYear(seasons[next].year); setError('');
+          document.getElementById(`season-tab-${seasons[next].year}`)?.focus();
+        }}>{season.year}</button>)}
+    </div>
+    <div id="season-standings" role="tabpanel" aria-labelledby={`season-tab-${selectedYear}`}>
     <section className="standings-panel" aria-label="리그 순위표">
-      <div className="standings-toolbar"><h2>팀 순위</h2>{data?.admin && <div className="standings-edit-actions">
+      <div className="standings-toolbar"><h2>{selectedYear}년 팀 순위</h2>{data?.admin && isCurrent && <div className="standings-edit-actions">
         {editing ? <><button className="secondary" disabled={busy} onClick={() => { setDraft(null); setError(''); }}>취소</button><button disabled={busy || rows.some(team => team.win + team.lose > team.total)} onClick={() => void save()}>{busy ? '저장 중…' : '저장'}</button></> : <button onClick={startEditing}>수정</button>}
       </div>}</div>
       {editing && <p className="standings-edit-help">승리 + 패배는 경기 수를 넘을 수 없습니다. 경기 승패 +1에는 해당 세트 2개가 기본 반영됩니다. 세트 수는 따로 조정할 수 있으며 승점은 세트 승리 × 3입니다.</p>}
@@ -76,7 +94,9 @@ export default function RankPage() {
           <caption className="standings-sr-only">팀별 경기 수, 승리, 패배, 승점, 연속 승패</caption>
           <thead><tr>{['순위', '팀', '경기 수', '승리', '패배', ...(editing ? ['세트 승리', '세트 패배'] : []), '승점', '연속'].map(title => <th scope="col" key={title} className={title === '승점' ? 'standings-points' : ''}>{title}</th>)}</tr></thead>
           <tbody>{rows.map(team => <tr key={team.name} className={team.rank <= 3 && team.total > 0 ? 'standings-top-team' : ''}>
-            <td className="standings-position"><span className={`position-number${team.rank <= 3 && team.total > 0 ? ` podium-position podium-${team.rank}` : ''}`}>{String(team.rank).padStart(2, '0')}</span></td>
+            <td className="standings-position"><span className={`position-number${team.rank <= 3 && team.total > 0 ? ` podium-position podium-${team.rank}` : ''}`}>{String(team.rank).padStart(2, '0')}</span>
+              {team.total > 0 && rows.some(other => other.name !== team.name && other.point === team.point) && <span className="shared-rank-label">공동</span>}
+            </td>
             <th scope="row" className="standings-team">{team.name}</th>
             <td className="standings-played">{numberCell(team, 'total')}</td>
             <td className="standings-wins">{numberCell(team, 'win')}</td><td className="standings-secondary standings-losses">{numberCell(team, 'lose')}</td>
@@ -89,7 +109,8 @@ export default function RankPage() {
         </table>
         {!data && <p className="standings-loading" role="status">순위를 불러오는 중입니다.</p>}
       </div>
-      <div className="standings-footer"><span>기본 일정은 팀당 11경기입니다.</span><span className="standings-scroll-hint">좌우로 밀어 전체 기록 보기 ↔</span></div>
+      <div className="standings-footer"><span>{isCurrent ? '기본 일정은 팀당 11경기입니다.' : '2025 시즌 종료'}</span><span className="standings-scroll-hint">좌우로 밀어 전체 기록 보기 ↔</span></div>
     </section>
+    </div>
   </main>;
 }
