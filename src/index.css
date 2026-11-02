@@ -4,6 +4,14 @@
   box-sizing: border-box;
 }
 
+/* Keep laptop/mobile sizing; scale the shared rem-based UI on wide screens.
+   1600px: 100%, 1920px: 125%, capped at 137.5% for larger monitors. */
+@media (min-width: 1600px) {
+  html {
+    font-size: clamp(100%, calc(1.25vw + 100% - 20px), 137.5%);
+  }
+}
+
 body {
   overflow: auto;
 }
